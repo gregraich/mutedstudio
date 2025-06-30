@@ -2,240 +2,232 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import SmoothScrollProvider from '@/components/SmoothScrollProvider'
+import ProjectCard from '@/components/ProjectCard'
+import TeamMemberCard from '@/components/TeamMemberCard'
+import IntroAnimation from '@/components/IntroAnimation'
+import PageTransition from '@/components/PageTransition'
+import { useIntro } from '@/lib/IntroContext'
+
+// Project data with status and multiple images
+const projects = [
+  {
+    title: "Stone Garden",
+    description: "A massed stone garden balancing slope and softness, creating a harmonious blend of natural elements and architectural precision.",
+    status: "Completed" as const,
+    images: [
+      { src: "/res1.png", alt: "A massed stone garden balancing slope and softness" },
+      { src: "/res1.png", alt: "Stone garden detail view" },
+      { src: "/res1.png", alt: "Stone garden overview" }
+    ]
+  },
+  {
+    title: "Conversation Pit",
+    description: "A sunken conversation pit surrounded by corten steel and structured plantings, designed for intimate gatherings and contemplation.",
+    status: "Under Construction" as const,
+    images: [
+      { src: "/res2.png", alt: "A sunken conversation pit surrounded by corten steel and structured plantings" },
+      { src: "/res2.png", alt: "Conversation pit construction progress" }
+    ]
+  },
+  {
+    title: "Pool House",
+    description: "A geometric pool house with cantilevered concrete planes, embodying modern architectural principles and functional elegance.",
+    status: "Completed" as const,
+    images: [
+      { src: "/res3.png", alt: "A geometric pool house with cantilevered concrete planes" },
+      { src: "/res3.png", alt: "Pool house interior view" },
+      { src: "/res3.png", alt: "Pool house exterior detail" }
+    ]
+  },
+  {
+    title: "Courtyard",
+    description: "A minimalist courtyard with rhythmic stone pavers and sculptural plantings, creating a serene outdoor living space.",
+    status: "Coming Soon" as const,
+    images: [
+      { src: "/res4.png", alt: "A minimalist courtyard with rhythmic stone pavers and sculptural plantings" }
+    ]
+  },
+  {
+    title: "Terraced Garden",
+    description: "A terraced garden with cascading water features and geometric plantings, demonstrating the integration of natural and built elements.",
+    status: "Under Construction" as const,
+    images: [
+      { src: "/res5.png", alt: "A terraced garden with cascading water features and geometric plantings" },
+      { src: "/res5.png", alt: "Terraced garden construction phase" }
+    ]
+  }
+]
+
+// Team data
+const teamMembers = [
+  {
+    name: "Engineering Partner",
+    title: "Structural Engineer",
+    description: "Holds an engineering degree from Queen's University, bringing a strong foundation of structural knowledge and technical precision to every project.",
+    image: "/team-engineer.jpg"
+  },
+  {
+    name: "Lead Architect",
+    title: "Design Director",
+    description: "Earned her doctorate in architecture from the University of Toronto, grounding our design ethos in academic excellence and spatial innovation.",
+    image: "/team-architect.jpg"
+  },
+  {
+    name: "Creative Technologist",
+    title: "Digital Experience Lead",
+    description: "Specializing in visual design, 3D rendering, and digital experience, contributing forward-thinking visuals and project previews.",
+    image: "/team-technologist.jpg"
+  }
+]
 
 export default function Home() {
   const [showIntro, setShowIntro] = useState(true)
   const [fadeOutIntro, setFadeOutIntro] = useState(false)
-  const [showNav, setShowNav] = useState(false)
+  const { setShowNav } = useIntro()
 
-  useEffect(() => {
-    // Start fade out after 2.5s
-    const fadeTimer = setTimeout(() => {
-      setFadeOutIntro(true)
-    }, 2500)
-
-    // Remove intro from DOM after fade completes (1s)
-    const removeTimer = setTimeout(() => {
+  const handleIntroComplete = () => {
+    setFadeOutIntro(true)
+    // Remove intro from DOM after fade completes
+    setTimeout(() => {
       setShowIntro(false)
-      // Show nav after intro is removed
-      setTimeout(() => setShowNav(true), 100)
-    }, 3500)
-
-    return () => {
-      clearTimeout(fadeTimer)
-      clearTimeout(removeTimer)
-    }
-  }, [])
+      // Show navigation after intro is removed
+      setTimeout(() => {
+        setShowNav(true)
+      }, 100)
+    }, 500)
+  }
 
   return (
-    <main className="relative min-h-screen bg-background text-foreground">
-      {/* Intro Animation */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-500 ${
-          showIntro ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className="relative z-10 text-center">
-          <div className={`relative w-[200px] h-[200px] transition-all duration-800 ${
-            fadeOutIntro ? 'animate-morph-logo' : 'animate-scale-up animate-glow-pulse'
-          }`}>
-            <Image
-              src="/mutedlogo.png"
-              alt="Muted Studio"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-          <div className={`mt-8 text-2xl font-light tracking-[0.2em] uppercase overflow-hidden whitespace-nowrap border-r-2 border-white animate-typewriter w-[17ch] transition-opacity duration-500 ${
-            fadeOutIntro ? 'opacity-0' : 'opacity-100'
-          }`}>
-            Muted Studio
-          </div>
-        </div>
-      </div>
+    <SmoothScrollProvider>
+      <main className="relative min-h-screen bg-background text-foreground">
+        {/* Intro Animation */}
+        <IntroAnimation
+          showIntro={showIntro}
+          fadeOutIntro={fadeOutIntro}
+          onComplete={handleIntroComplete}
+        />
 
-      {/* Navigation */}
-      <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
-        showNav ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-      }`}>
-        <div className="container mx-auto px-6 py-4">
-          <nav className="flex items-center justify-between">
-            <div className={`relative w-[60px] h-[60px] transition-all duration-800 ${
-              fadeOutIntro ? 'opacity-100' : 'opacity-0'
-            }`}>
-              <Image
-                src="/mutedlogo.png"
-                alt="Muted Studio"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
-            <div className="flex gap-12 text-sm tracking-widest uppercase">
-              <Link href="#work" className="hover:text-accent transition-colors">Work</Link>
-              <Link href="#about" className="hover:text-accent transition-colors">About</Link>
-              <Link href="#contact" className="hover:text-accent transition-colors">Contact</Link>
-            </div>
-          </nav>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="relative h-screen">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/muted.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="relative h-full flex items-center justify-center text-center">
-          <div className="max-w-4xl px-8">
-            <h1 className="text-display mb-8 tracking-widest uppercase">
-              Architectural Design-Build
-            </h1>
-            <p className="text-xl tracking-wide">
-              Creating bold, cinematic outdoor environments that balance form and function
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Work Section */}
-      <section id="work" className="py-32">
-        <div className="container mx-auto space-y-32">
-          <div className="animate-fade-in">
-            <div className="relative aspect-video mb-8">
-              <Image
-                src="/res1.png"
-                alt="A massed stone garden balancing slope and softness"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-            <h2 className="text-h2 tracking-widest uppercase mb-4">Stone Garden</h2>
-            <p className="text-body text-muted">A massed stone garden balancing slope and softness</p>
-          </div>
-
-          <div className="animate-fade-in">
-            <div className="relative aspect-video mb-8">
-              <Image
-                src="/res2.png"
-                alt="A sunken conversation pit surrounded by corten steel and structured plantings"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-            <h2 className="text-h2 tracking-widest uppercase mb-4">Conversation Pit</h2>
-            <p className="text-body text-muted">A sunken conversation pit surrounded by corten steel and structured plantings</p>
-          </div>
-
-          <div className="animate-fade-in">
-            <div className="relative aspect-video mb-8">
-              <Image
-                src="/res3.png"
-                alt="A geometric pool house with cantilevered concrete planes"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-            <h2 className="text-h2 tracking-widest uppercase mb-4">Pool House</h2>
-            <p className="text-body text-muted">A geometric pool house with cantilevered concrete planes</p>
-          </div>
-
-          <div className="animate-fade-in">
-            <div className="relative aspect-video mb-8">
-              <Image
-                src="/res4.png"
-                alt="A minimalist courtyard with rhythmic stone pavers and sculptural plantings"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-            <h2 className="text-h2 tracking-widest uppercase mb-4">Courtyard</h2>
-            <p className="text-body text-muted">A minimalist courtyard with rhythmic stone pavers and sculptural plantings</p>
-          </div>
-
-          <div className="animate-fade-in">
-            <div className="relative aspect-video mb-8">
-              <Image
-                src="/res5.png"
-                alt="A terraced garden with cascading water features and geometric plantings"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-            <h2 className="text-h2 tracking-widest uppercase mb-4">Terraced Garden</h2>
-            <p className="text-body text-muted">A terraced garden with cascading water features and geometric plantings</p>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-32 bg-black/50">
-        <div className="container mx-auto max-w-3xl">
-          <h2 className="text-h2 tracking-widest uppercase mb-8">About</h2>
-          <p className="text-body mb-8">
-            Muted Studio is an architectural design-build practice based in Toronto. We create bold outdoor environments that balance form and function, using precise design language and premium materials.
-          </p>
-          <p className="text-body">
-            Our work explores the relationship between built form and natural elements, creating spaces that are both visually striking and deeply functional.
-          </p>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-32">
-        <div className="container mx-auto max-w-3xl">
-          <h2 className="text-h2 tracking-widest uppercase mb-8">Contact</h2>
-          <form className="space-y-8">
-            <div>
-              <input
-                type="text"
-                placeholder="Name"
-                className="w-full bg-transparent border border-border p-4 text-foreground placeholder-muted focus:border-accent outline-none transition-colors"
-              />
-            </div>
-            <div>
-              <input
-                type="email"
-                placeholder="Email"
-                className="w-full bg-transparent border border-border p-4 text-foreground placeholder-muted focus:border-accent outline-none transition-colors"
-              />
-            </div>
-            <div>
-              <textarea
-                placeholder="Message"
-                rows={6}
-                className="w-full bg-transparent border border-border p-4 text-foreground placeholder-muted focus:border-accent outline-none transition-colors"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-8 py-4 bg-accent text-background tracking-widest uppercase hover:bg-accent/90 transition-colors"
+        {/* Main Content */}
+        <PageTransition>
+          {/* Hero Section */}
+          <section className="relative h-screen">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
             >
-              Send Message
-            </button>
-          </form>
-        </div>
-      </section>
+              <source src="/muted.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-black/60" />
+            <div className="relative h-full flex items-center justify-center text-center">
+              <div className="max-w-4xl px-8">
+                <h1 className="text-display mb-8 tracking-widest uppercase">
+                  Architectural Design-Build
+                </h1>
+                <p className="text-xl tracking-wide">
+                  Creating bold, cinematic outdoor environments that balance form and function
+                </p>
+              </div>
+            </div>
+          </section>
 
-      {/* Footer */}
-      <footer className="py-16 border-t border-border">
-        <div className="container mx-auto text-center text-sm text-muted">
-          © {new Date().getFullYear()} Muted Studio. All rights reserved.
-        </div>
-      </footer>
-    </main>
+          {/* Work Section */}
+          <section id="work" className="py-32">
+            <div className="container mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                {projects.map((project, index) => (
+                  <ProjectCard
+                    key={project.title}
+                    title={project.title}
+                    description={project.description}
+                    status={project.status}
+                    images={project.images}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* About Section */}
+          <section id="about" className="py-32 bg-black/50">
+            <div className="container mx-auto max-w-6xl">
+              <div className="mb-16">
+                <h2 className="text-h2 tracking-widest uppercase mb-8">About</h2>
+                <p className="text-body mb-8 max-w-3xl">
+                  Muted Studio is an architectural design-build practice based in Toronto. We create bold outdoor environments that balance form and function, using precise design language and premium materials.
+                </p>
+                <p className="text-body max-w-3xl">
+                  Our work explores the relationship between built form and natural elements, creating spaces that are both visually striking and deeply functional.
+                </p>
+              </div>
+
+              {/* Team Section */}
+              <div>
+                <h3 className="text-h3 tracking-widest uppercase mb-12">Our Team</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {teamMembers.map((member, index) => (
+                    <TeamMemberCard
+                      key={member.name}
+                      name={member.name}
+                      title={member.title}
+                      description={member.description}
+                      image={member.image}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Contact Section */}
+          <section id="contact" className="py-32">
+            <div className="container mx-auto max-w-3xl">
+              <h2 className="text-h2 tracking-widest uppercase mb-8">Contact</h2>
+              <form className="space-y-8">
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Name"
+                    className="w-full bg-transparent border border-border p-4 text-foreground placeholder-muted focus:border-accent outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    className="w-full bg-transparent border border-border p-4 text-foreground placeholder-muted focus:border-accent outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <textarea
+                    placeholder="Message"
+                    rows={6}
+                    className="w-full bg-transparent border border-border p-4 text-foreground placeholder-muted focus:border-accent outline-none transition-colors"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="px-8 py-4 bg-accent text-background tracking-widest uppercase hover:bg-accent/90 transition-colors"
+                >
+                  Send Message
+                </button>
+              </form>
+            </div>
+          </section>
+
+          {/* Footer */}
+          <footer className="py-16 border-t border-border">
+            <div className="container mx-auto text-center text-sm text-muted">
+              © {new Date().getFullYear()} Muted Studio. All rights reserved.
+            </div>
+          </footer>
+        </PageTransition>
+      </main>
+    </SmoothScrollProvider>
   )
 }
