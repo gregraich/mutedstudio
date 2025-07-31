@@ -16,6 +16,7 @@ export default function Navigation({ showNav }: NavigationProps) {
     { href: '/work', label: 'Work' },
     { href: '/about', label: 'About' },
     { href: '/testimonials', label: 'Testimonials' },
+    { href: '/consultation', label: 'Design/Build Consultation' },
     { href: '/contact', label: 'Contact' }
   ]
 

@@ -5,45 +5,45 @@ import PageTransition from '@/components/PageTransition'
 
 const testimonials = [
   {
-    name: "Sarah Chen",
+    name: "Sarah C",
     title: "Residential Client",
     project: "Stone Garden",
-    content: "Muted Studio transformed our backyard into a breathtaking outdoor sanctuary. Their attention to detail and understanding of our vision exceeded all expectations. The stone garden they created is not just beautiful—it's a place where our family gathers daily.",
+    content: "Fion as a designer really knows how to make a space feel like home. She is so easy to work with and always has a solution to any problem. I would highly recommend her to anyone looking for a landscape architect.",
     rating: 5
   },
   {
-    name: "Michael Rodriguez",
-    title: "Commercial Property Owner",
+    name: "Michael R",
+    title: "Commercial Client",
     project: "Conversation Pit",
-    content: "Working with Muted Studio was a revelation. They took our corporate courtyard from functional to phenomenal. The conversation pit has become the heart of our outdoor meetings and employee gatherings. Their design-build approach ensured seamless execution.",
+    content: "Alex and Greg are a dream team. They are so easy to work with and always have a solution to any problem. They are also very responsive and always willing to help. I would highly recommend them to anyone looking for a proper team.",
     rating: 5
   },
   {
-    name: "Jennifer Walsh",
-    title: "Luxury Homeowner",
-    project: "Pool House",
-    content: "The pool house Muted Studio designed for us is nothing short of architectural poetry. Every element feels intentional and refined. They managed to create a space that's both modern and timeless, perfectly complementing our home's aesthetic.",
+    name: "Jennifer W",
+    title: "Residential Client",
+    project: "Full front and back yard renovation",
+    content: "Muted Studio really blew it out of the park with the pool house. It is so much more than a backyard, it is a space that we can use for so many different things. The design is so thoughtful and the attention to detail is unmatched.I recommend them to anyone looking for professional results!.",
     rating: 5
   },
   {
-    name: "David Thompson",
-    title: "Landscape Enthusiast",
+    name: "David T",
+    title: "Residential Client",
     project: "Terraced Garden",
-    content: "As someone who appreciates both form and function, I was blown away by Muted Studio's terraced garden design. The way they integrated water features with geometric plantings creates a dynamic, ever-changing landscape that's both beautiful and sustainable.",
+    content: "Im very picky, and have gone through a lot of landscape architects. Muted Studio is the best I have worked with. They are so easy to work with and always have a solution to any problem. I would highly recommend them to anyone looking for a professional job done right.",
     rating: 5
   },
   {
-    name: "Lisa Park",
-    title: "Interior Designer",
-    project: "Courtyard",
-    content: "Collaborating with Muted Studio on our courtyard project was a dream. Their understanding of spatial relationships and material selection perfectly complemented our interior design work. The result is a seamless indoor-outdoor experience.",
+    name: "Lisa P",
+    title: "Residential Client",
+    project: "Full outdoor reconstruction",
+    content: "The way they transformed our backyard is amazing. They are so easy to work with and always have a solution to any problem. I would highly recommend them to anyone looking for an amazing team.",
     rating: 5
   },
   {
-    name: "Robert Kim",
-    title: "Architecture Collector",
+    name: "Robert K",
+    title: "Residential Client",
     project: "Multiple Projects",
-    content: "I've worked with many architectural firms, but Muted Studio stands apart. Their ability to balance bold design statements with practical functionality is remarkable. Each project they've completed for us has exceeded our expectations and become a conversation piece.",
+    content: "I've worked with many Design and Build firms, but Muted Studio stands out alot. Every project they have done for me has been a success. They are so easy to work with and always have a solution to any problem. I would highly recommend them to anyone looking for a great team.",
     rating: 5
   }
 ]
