@@ -174,6 +174,89 @@
   100% { width: 17ch; }
 }
 
+/* Coming soon: slow cinematic drift on background media */
+@keyframes comingSoonDrift {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.055);
+  }
+}
+
+@keyframes comingSoonGrain {
+  0% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(-0.8%, 0.6%);
+  }
+  66% {
+    transform: translate(0.6%, -0.5%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+.animate-coming-soon-drift {
+  animation: comingSoonDrift 36s ease-in-out infinite alternate;
+}
+
+.animate-coming-soon-grain {
+  animation: comingSoonGrain 12s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-coming-soon-drift,
+  .animate-coming-soon-grain {
+    animation: none !important;
+  }
+
+  .coming-soon-tagline {
+    animation: none !important;
+    background: none !important;
+    -webkit-text-fill-color: unset !important;
+    color: rgb(163 163 163) !important;
+    filter: none !important;
+  }
+}
+
+/* Coming soon: soft flowing shimmer + glow on tagline */
+@keyframes comingSoonTaglineLux {
+  0%,
+  100% {
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 10px rgba(193, 171, 120, 0.14))
+      drop-shadow(0 0 36px rgba(193, 171, 120, 0.06));
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 22px rgba(193, 171, 120, 0.32))
+      drop-shadow(0 0 52px rgba(245, 245, 245, 0.06));
+  }
+}
+
+.coming-soon-tagline {
+  background-image: linear-gradient(
+    100deg,
+    rgba(140, 140, 140, 0.88) 0%,
+    rgba(175, 168, 150, 0.95) 22%,
+    rgba(193, 171, 120, 1) 38%,
+    rgba(245, 243, 238, 0.98) 50%,
+    rgba(193, 171, 120, 0.98) 62%,
+    rgba(150, 148, 142, 0.9) 82%,
+    rgba(120, 120, 120, 0.85) 100%
+  );
+  background-size: 240% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: comingSoonTaglineLux 16s ease-in-out infinite;
+}
+
 /* Grid System */
 .grid-container {
   display: grid;

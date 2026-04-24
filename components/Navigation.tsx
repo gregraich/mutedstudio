@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { SITE_MODE } from '@/lib/siteMode'
 
 interface NavigationProps {
   showNav: boolean
@@ -11,6 +12,11 @@ interface NavigationProps {
 
 export default function Navigation({ showNav }: NavigationProps) {
   const pathname = usePathname()
+  const isComingSoonHome = SITE_MODE === 'coming-soon' && pathname === '/'
+
+  if (isComingSoonHome) {
+    return null
+  }
 
   const navItems = [
     { href: '/work', label: 'Work' },
@@ -28,11 +34,11 @@ export default function Navigation({ showNav }: NavigationProps) {
         y: showNav ? 0 : -20 
       }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/20"
+      className="fixed top-0 left-0 right-0 z-40 border-b border-border/20 bg-background/80 backdrop-blur-md"
     >
       <div className="container mx-auto px-6 py-4">
-        <nav className="flex items-center justify-between">
-          <Link href="/" className="relative w-[60px] h-[60px]">
+        <nav className="flex items-center justify-between" aria-label="Primary">
+          <Link href="/" className="relative block h-[52px] w-[52px] sm:h-[56px] sm:w-[56px]">
             <Image
               src="/mutedlogo.png"
               alt="Muted Studio"
@@ -41,8 +47,8 @@ export default function Navigation({ showNav }: NavigationProps) {
               priority
             />
           </Link>
-          
-          <div className="flex gap-12 text-sm tracking-widest uppercase">
+
+          <div className="flex flex-wrap justify-end gap-x-10 gap-y-3 text-sm tracking-widest uppercase lg:gap-x-12">
             {navItems.map((item) => (
               <Link
                 key={item.href}
