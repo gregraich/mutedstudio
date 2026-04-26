@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useIntro } from '@/lib/IntroContext'
+import IntroAnimation from '@/components/IntroAnimation'
 
 const easePremium: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
@@ -11,10 +12,70 @@ const noiseDataUri = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 export default function ComingSoonHome() {
   const { setShowNav } = useIntro()
   const reduceMotion = useReducedMotion()
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const [showIntro, setShowIntro] = useState(true)
+  const [fadeOutIntro, setFadeOutIntro] = useState(false)
+  const [videoReady, setVideoReady] = useState(false)
+  const [videoPlayable, setVideoPlayable] = useState(true)
 
   useEffect(() => {
-    setShowNav(true)
+    setShowNav(false)
   }, [setShowNav])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const attemptPlay = async () => {
+      try {
+        video.muted = true
+        video.defaultMuted = true
+        const playPromise = video.play()
+        if (playPromise && typeof playPromise.then === 'function') {
+          await playPromise
+        }
+      } catch {
+        // iOS can block autoplay in Low Power mode or strict settings.
+        setVideoPlayable(false)
+      }
+    }
+
+    const onCanPlay = () => {
+      setVideoReady(true)
+      void attemptPlay()
+    }
+
+    const onPlaying = () => {
+      setVideoReady(true)
+      setVideoPlayable(true)
+    }
+
+    const onError = () => {
+      setVideoPlayable(false)
+    }
+
+    video.addEventListener('canplay', onCanPlay)
+    video.addEventListener('playing', onPlaying)
+    video.addEventListener('error', onError)
+
+    void attemptPlay()
+
+    return () => {
+      video.removeEventListener('canplay', onCanPlay)
+      video.removeEventListener('playing', onPlaying)
+      video.removeEventListener('error', onError)
+    }
+  }, [setShowNav])
+
+  const handleIntroComplete = () => {
+    setFadeOutIntro(true)
+    setTimeout(() => {
+      setShowIntro(false)
+      setTimeout(() => {
+        setShowNav(true)
+      }, 120)
+    }, 520)
+  }
 
   const transitionBase = reduceMotion
     ? { duration: 0.01 }
@@ -24,40 +85,57 @@ export default function ComingSoonHome() {
 
   return (
     <main className="relative flex min-h-[100dvh] flex-col bg-[#070707] text-foreground overflow-hidden">
+      <IntroAnimation showIntro={showIntro} fadeOutIntro={fadeOutIntro} onComplete={handleIntroComplete} />
       <div className="pointer-events-none absolute inset-0 z-0">
         <div className="absolute inset-0 overflow-hidden">
           <div
             className={`absolute inset-0 ${reduceMotion ? '' : 'animate-coming-soon-drift'}`}
             style={{ transformOrigin: '50% 50%' }}
           >
-            <video autoPlay muted loop playsInline className="h-full w-full scale-[1.08] object-cover opacity-[0.92]">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              loop
+              preload="metadata"
+              poster="/mutedlogo.png"
+              className={`h-full w-full scale-[1.03] object-cover opacity-[0.97] contrast-[1.05] saturate-[1.04] transition-opacity duration-700 ${
+                videoReady && videoPlayable ? 'opacity-[0.97]' : 'opacity-0'
+              }`}
+            >
               <source src="/muted.mp4" type="video/mp4" />
             </video>
+            {(!videoReady || !videoPlayable) && (
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_70%_at_50%_10%,rgba(214,197,157,0.16),rgba(10,10,10,0.95)_60%,rgba(7,7,7,1)_100%)]" />
+            )}
           </div>
         </div>
 
+        <div className="absolute inset-0 bg-gradient-to-b from-black/44 via-[#0a0a0a]/52 to-[#070707]/70" aria-hidden />
         <div
-          className="absolute inset-0 bg-gradient-to-b from-black/75 via-[#0a0a0a]/82 to-[#070707] mix-blend-multiply"
-          aria-hidden
-        />
-        <div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(193,171,120,0.14),transparent_58%)]"
+          className="absolute inset-0 bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(193,171,120,0.16),transparent_58%)]"
           aria-hidden
         />
         <div
           className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_100%,rgba(255,255,255,0.04),transparent_55%)]"
           aria-hidden
         />
-        <div className="absolute inset-0 shadow-[inset_0_0_160px_rgba(0,0,0,0.72)]" aria-hidden />
+        <div
+          className="absolute inset-0 bg-[radial-gradient(ellipse_120%_92%_at_50%_50%,transparent_58%,rgba(0,0,0,0.26)_100%)]"
+          aria-hidden
+        />
+        <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.42)]" aria-hidden />
+        <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-[#070707]/76 via-[#070707]/36 to-transparent" aria-hidden />
 
         <div
-          className="absolute inset-0 opacity-[0.04] mix-blend-soft-light"
+          className="absolute inset-0 opacity-[0.025] mix-blend-soft-light"
           style={{ backgroundImage: noiseDataUri }}
           aria-hidden
         />
         {!reduceMotion && (
           <div
-            className="absolute inset-0 opacity-[0.022] mix-overlay animate-coming-soon-grain"
+            className="absolute inset-0 opacity-[0.014] mix-overlay animate-coming-soon-grain"
             style={{ backgroundImage: noiseDataUri, backgroundSize: '180px 180px' }}
             aria-hidden
           />
@@ -88,8 +166,8 @@ export default function ComingSoonHome() {
             transition={{ ...transitionBase, delay: stagger * 2 }}
             className="mx-auto mt-10 max-w-xl sm:mt-12"
           >
-            <p className="text-[clamp(1rem,2.4vw,1.2rem)] font-light leading-relaxed tracking-[0.06em] text-white/78">
-              A design-build practice shaping refined outdoor environments.
+            <p className="text-[clamp(1rem,2.4vw,1.2rem)] font-light leading-relaxed tracking-[0.06em] text-white/82">
+              A design-build firm that creates refined, thoughtfully curated environments and landscapes.
             </p>
           </motion.div>
 
@@ -97,7 +175,7 @@ export default function ComingSoonHome() {
             initial={reduceMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 3 }}
-            className={`mt-8 max-w-2xl px-2 text-[clamp(0.8rem,2.1vw,0.95rem)] font-medium uppercase leading-relaxed tracking-[0.32em] sm:mt-10 sm:tracking-[0.38em] ${
+            className={`mt-8 max-w-2xl px-2 text-[clamp(0.8rem,2.1vw,0.95rem)] font-semibold uppercase leading-relaxed tracking-[0.34em] text-white/92 sm:mt-10 sm:tracking-[0.4em] ${
               reduceMotion ? 'text-muted' : 'coming-soon-tagline'
             }`}
           >

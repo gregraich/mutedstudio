@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { useTypewriter } from '@/lib/useTypewriter'
@@ -12,13 +13,29 @@ interface IntroAnimationProps {
 
 export default function IntroAnimation({ showIntro, fadeOutIntro, onComplete }: IntroAnimationProps) {
   const { displayText, isComplete } = useTypewriter("Muted Studio", 120)
+  const completionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Trigger completion after typewriter finishes
-  if (isComplete && showIntro && !fadeOutIntro) {
-    setTimeout(() => {
+  // Trigger completion after typewriter finishes, without scheduling on every render.
+  useEffect(() => {
+    if (!isComplete || !showIntro || fadeOutIntro) return
+    completionTimeoutRef.current = setTimeout(() => {
       onComplete()
     }, 1000)
-  }
+
+    return () => {
+      if (completionTimeoutRef.current) {
+        clearTimeout(completionTimeoutRef.current)
+      }
+    }
+  }, [fadeOutIntro, isComplete, onComplete, showIntro])
+
+  useEffect(() => {
+    return () => {
+      if (completionTimeoutRef.current) {
+        clearTimeout(completionTimeoutRef.current)
+      }
+    }
+  }, [])
 
   if (!showIntro) return null
 
