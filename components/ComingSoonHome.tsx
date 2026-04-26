@@ -26,10 +26,15 @@ export default function ComingSoonHome() {
     const video = videoRef.current
     if (!video) return
 
+    // Reinforce iOS/Safari inline-autoplay requirements on the actual DOM node.
+    video.muted = true
+    video.defaultMuted = true
+    video.playsInline = true
+    video.setAttribute('playsinline', '')
+    video.setAttribute('webkit-playsinline', 'true')
+
     const attemptPlay = async () => {
       try {
-        video.muted = true
-        video.defaultMuted = true
         const playPromise = video.play()
         if (playPromise && typeof playPromise.then === 'function') {
           await playPromise
@@ -45,6 +50,10 @@ export default function ComingSoonHome() {
       void attemptPlay()
     }
 
+    const onLoadedData = () => {
+      setVideoReady(true)
+    }
+
     const onPlaying = () => {
       setVideoReady(true)
       setVideoPlayable(true)
@@ -55,6 +64,7 @@ export default function ComingSoonHome() {
     }
 
     video.addEventListener('canplay', onCanPlay)
+    video.addEventListener('loadeddata', onLoadedData)
     video.addEventListener('playing', onPlaying)
     video.addEventListener('error', onError)
 
@@ -62,6 +72,7 @@ export default function ComingSoonHome() {
 
     return () => {
       video.removeEventListener('canplay', onCanPlay)
+      video.removeEventListener('loadeddata', onLoadedData)
       video.removeEventListener('playing', onPlaying)
       video.removeEventListener('error', onError)
     }
@@ -98,21 +109,29 @@ export default function ComingSoonHome() {
               muted
               playsInline
               loop
-              preload="metadata"
-              poster="/mutedlogo.png"
-              className={`h-full w-full scale-[1.03] object-cover opacity-[0.97] contrast-[1.05] saturate-[1.04] transition-opacity duration-700 ${
-                videoReady && videoPlayable ? 'opacity-[0.97]' : 'opacity-0'
+              preload="auto"
+              poster="/black8.jpg"
+              className={`h-full w-full scale-[1.03] object-cover contrast-[1.05] saturate-[1.04] transition-opacity duration-700 ${
+                videoPlayable ? (videoReady ? 'opacity-[0.97]' : 'opacity-[0.92]') : 'opacity-0'
               }`}
             >
               <source src="/muted.mp4" type="video/mp4" />
             </video>
-            {(!videoReady || !videoPlayable) && (
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_70%_at_50%_10%,rgba(214,197,157,0.16),rgba(10,10,10,0.95)_60%,rgba(7,7,7,1)_100%)]" />
+            {!videoPlayable && (
+              <div className="absolute inset-0">
+                <img
+                  src="/black8.jpg"
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
             )}
           </div>
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-b from-black/44 via-[#0a0a0a]/52 to-[#070707]/70" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-[#0a0a0a]/47 to-[#070707]/66" aria-hidden />
         <div
           className="absolute inset-0 bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(193,171,120,0.16),transparent_58%)]"
           aria-hidden
@@ -126,7 +145,11 @@ export default function ComingSoonHome() {
           aria-hidden
         />
         <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.42)]" aria-hidden />
-        <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-[#070707]/76 via-[#070707]/36 to-transparent" aria-hidden />
+        <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-[#070707]/72 via-[#070707]/32 to-transparent" aria-hidden />
+        <div
+          className="absolute left-1/2 top-[58%] h-[20%] w-[min(92vw,44rem)] -translate-x-1/2 bg-[radial-gradient(ellipse_70%_65%_at_50%_50%,rgba(0,0,0,0.34),rgba(0,0,0,0)_100%)]"
+          aria-hidden
+        />
 
         <div
           className="absolute inset-0 opacity-[0.025] mix-blend-soft-light"
@@ -175,7 +198,7 @@ export default function ComingSoonHome() {
             initial={reduceMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 3 }}
-            className={`mt-8 max-w-2xl px-2 text-[clamp(0.8rem,2.1vw,0.95rem)] font-semibold uppercase leading-relaxed tracking-[0.34em] text-white/92 sm:mt-10 sm:tracking-[0.4em] ${
+            className={`mt-8 max-w-2xl px-3 py-2 text-[clamp(0.8rem,2.1vw,0.95rem)] font-semibold uppercase leading-relaxed tracking-[0.34em] text-white/94 [text-shadow:0_2px_10px_rgba(0,0,0,0.58)] sm:mt-10 sm:px-4 sm:tracking-[0.4em] ${
               reduceMotion ? 'text-muted' : 'coming-soon-tagline'
             }`}
           >
