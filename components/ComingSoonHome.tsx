@@ -26,6 +26,8 @@ export default function ComingSoonHome() {
     const video = videoRef.current
     if (!video) return
 
+    let fallbackTimeout: ReturnType<typeof setTimeout> | null = null
+
     // Reinforce iOS/Safari inline-autoplay requirements on the actual DOM node.
     video.muted = true
     video.defaultMuted = true
@@ -64,7 +66,16 @@ export default function ComingSoonHome() {
     }
 
     const onError = () => {
-      setVideoFailed(true)
+      const errorCode = video.error?.code
+      const hasKnownSource =
+        Boolean(video.currentSrc) ||
+        Array.from(video.querySelectorAll('source')).some((sourceEl) => Boolean(sourceEl.src))
+      const hasLoadedData = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+
+      // iOS Safari can fire transient errors before media settles; only fall back on definitive source failures.
+      if (!hasLoadedData && (!hasKnownSource || errorCode === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)) {
+        setVideoFailed(true)
+      }
     }
 
     video.addEventListener('canplay', onCanPlay)
@@ -72,9 +83,19 @@ export default function ComingSoonHome() {
     video.addEventListener('playing', onPlaying)
     video.addEventListener('error', onError)
 
+    fallbackTimeout = setTimeout(() => {
+      const hasLoadedData = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+      if (!hasLoadedData) {
+        setVideoFailed(true)
+      }
+    }, 6500)
+
     void attemptPlay()
 
     return () => {
+      if (fallbackTimeout) {
+        clearTimeout(fallbackTimeout)
+      }
       video.removeEventListener('canplay', onCanPlay)
       video.removeEventListener('loadeddata', onLoadedData)
       video.removeEventListener('playing', onPlaying)
