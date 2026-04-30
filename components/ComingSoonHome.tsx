@@ -129,6 +129,7 @@ export default function ComingSoonHome() {
                 videoFailed ? 'opacity-0' : videoReady ? 'opacity-[0.97]' : 'opacity-[0.92]'
               }`}
             >
+              <source src="/muted-ios.mp4" type='video/mp4; codecs="avc1.42E01F"' />
               <source src="/muted.mp4" type="video/mp4" />
             </video>
             {videoFailed && (
@@ -247,16 +248,9 @@ export default function ComingSoonHome() {
           >
             Our new digital experience is coming soon.
           </motion.p>
-        </div>
 
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ ...transitionBase, delay: reduceMotion ? 0 : 0.45 }}
-          className="flex w-full flex-col items-center pb-[max(4.5rem,env(safe-area-inset-bottom))] pt-10"
-        >
           <div
-            className="h-px w-16 bg-gradient-to-r from-transparent via-accent/65 to-transparent sm:w-24"
+            className="mt-10 h-px w-16 bg-gradient-to-r from-transparent via-accent/65 to-transparent sm:mt-12 sm:w-24"
             aria-hidden
           />
           <footer className="mt-6 w-full max-w-xl sm:mt-8">
@@ -308,7 +302,7 @@ export default function ComingSoonHome() {
               </motion.div>
             </div>
           </footer>
-        </motion.div>
+        </div>
       </motion.div>
     </main>
   )
