@@ -116,12 +116,12 @@ export default function IntroAnimation({ showIntro, fadeOutIntro, onComplete }: 
             duration: fadeOutIntro ? (compactMotion ? 0.24 : 0.9) : compactMotion ? 0.55 : 0.8,
             ease: exitEase,
           }}
-          className="relative mx-auto mb-8 h-[200px] w-[200px]"
+          className="relative mx-auto mb-7 h-[156px] w-[156px] sm:mb-8 sm:h-[200px] sm:w-[200px]"
         >
           <Image src="/mutedlogo.png" alt="Muted Studio" fill className="object-contain" priority />
         </motion.div>
 
-        <div className="flex h-8 items-center justify-center text-2xl font-light uppercase tracking-[0.2em]">
+        <div className="flex min-h-[2.1rem] items-center justify-center text-[1.3rem] font-light uppercase tracking-[0.17em] sm:h-8 sm:text-2xl sm:tracking-[0.2em]">
           <span className="inline-flex items-center">
             {renderedTypewriterText}
             {!isComplete && <span className="ml-1 animate-pulse">|</span>}
