@@ -17,7 +17,15 @@ export default function ComingSoonHome() {
   const [fadeOutIntro, setFadeOutIntro] = useState(false)
   const [videoReady, setVideoReady] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
-  const [contactOpen, setContactOpen] = useState(false)
+  const [isSmallScreen, setIsSmallScreen] = useState(false)
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsSmallScreen(mediaQuery.matches)
+    update()
+    mediaQuery.addEventListener('change', update)
+    return () => mediaQuery.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
     setShowNav(false)
@@ -35,6 +43,8 @@ export default function ComingSoonHome() {
     video.setAttribute('autoplay', '')
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', 'true')
+    video.preload = 'auto'
+    video.load()
 
     const attemptPlay = async () => {
       try {
@@ -64,6 +74,11 @@ export default function ComingSoonHome() {
       setVideoFailed(false)
     }
 
+    const onLoadedMetadata = () => {
+      setVideoFailed(false)
+      void attemptPlay()
+    }
+
     const onError = () => {
       // Only fail over on definitive source failure.
       if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
@@ -78,6 +93,7 @@ export default function ComingSoonHome() {
     }
 
     video.addEventListener('canplay', onCanPlay)
+    video.addEventListener('loadedmetadata', onLoadedMetadata)
     video.addEventListener('loadeddata', onLoadedData)
     video.addEventListener('playing', onPlaying)
     video.addEventListener('error', onError)
@@ -86,6 +102,7 @@ export default function ComingSoonHome() {
 
     return () => {
       video.removeEventListener('canplay', onCanPlay)
+      video.removeEventListener('loadedmetadata', onLoadedMetadata)
       video.removeEventListener('loadeddata', onLoadedData)
       video.removeEventListener('playing', onPlaying)
       video.removeEventListener('error', onError)
@@ -102,11 +119,13 @@ export default function ComingSoonHome() {
     }, INTRO_EXIT_HANDOFF_MS)
   }
 
-  const transitionBase = reduceMotion
+  const compactMotion = reduceMotion || isSmallScreen
+
+  const transitionBase = compactMotion
     ? { duration: 0.01 }
     : { duration: 1.05, ease: easePremium }
 
-  const stagger = reduceMotion ? 0 : 0.12
+  const stagger = compactMotion ? 0 : 0.12
 
   return (
     <main className="relative flex min-h-[100dvh] flex-col bg-[#070707] text-foreground overflow-hidden">
@@ -114,7 +133,7 @@ export default function ComingSoonHome() {
       <div className="pointer-events-none absolute inset-0 z-0">
         <div className="absolute inset-0 overflow-hidden">
           <div
-            className={`absolute inset-0 ${reduceMotion ? '' : 'animate-coming-soon-drift'}`}
+            className={`absolute inset-0 ${compactMotion ? '' : 'animate-coming-soon-drift'}`}
             style={{ transformOrigin: '50% 50%' }}
           >
             <video
@@ -125,7 +144,7 @@ export default function ComingSoonHome() {
               loop
               preload="auto"
               poster="/black8.jpg"
-              className={`h-full w-full scale-[1.03] object-cover contrast-[1.05] saturate-[1.04] transition-opacity duration-700 ${
+              className={`h-full w-full ${isSmallScreen ? 'scale-[1.01]' : 'scale-[1.03]'} object-cover contrast-[1.05] saturate-[1.04] transition-opacity duration-700 ${
                 videoFailed ? 'opacity-0' : videoReady ? 'opacity-[0.97]' : 'opacity-[0.92]'
               }`}
             >
@@ -152,23 +171,27 @@ export default function ComingSoonHome() {
           className="absolute inset-0 bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(155,180,212,0.18),transparent_58%)]"
           aria-hidden
         />
-        <div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_100%,rgba(255,255,255,0.04),transparent_55%)]"
-          aria-hidden
-        />
+        {!isSmallScreen && (
+          <div
+            className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_100%,rgba(255,255,255,0.04),transparent_55%)]"
+            aria-hidden
+          />
+        )}
         <div
           className="absolute inset-0 bg-[radial-gradient(ellipse_120%_92%_at_50%_50%,transparent_58%,rgba(0,0,0,0.26)_100%)]"
           aria-hidden
         />
-        <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.42)]" aria-hidden />
+        {!isSmallScreen && <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.42)]" aria-hidden />}
         <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-[#070707]/72 via-[#070707]/32 to-transparent" aria-hidden />
 
-        <div
-          className="absolute inset-0 opacity-[0.025] mix-blend-soft-light"
-          style={{ backgroundImage: noiseDataUri }}
-          aria-hidden
-        />
-        {!reduceMotion && (
+        {!isSmallScreen && (
+          <div
+            className="absolute inset-0 opacity-[0.025] mix-blend-soft-light"
+            style={{ backgroundImage: noiseDataUri }}
+            aria-hidden
+          />
+        )}
+        {!compactMotion && (
           <div
             className="absolute inset-0 opacity-[0.014] mix-overlay animate-coming-soon-grain"
             style={{ backgroundImage: noiseDataUri, backgroundSize: '180px 180px' }}
@@ -184,9 +207,9 @@ export default function ComingSoonHome() {
           opacity: fadeOutIntro || !showIntro ? 1 : 0,
         }}
         transition={{
-          duration: reduceMotion ? 0.2 : 0.95,
+          duration: compactMotion ? 0.2 : 0.95,
           ease: easePremium,
-          delay: reduceMotion ? 0 : fadeOutIntro ? 0.08 : 0,
+          delay: compactMotion ? 0 : fadeOutIntro ? 0.08 : 0,
         }}
       >
         <div
@@ -194,7 +217,7 @@ export default function ComingSoonHome() {
           className="flex flex-1 flex-col items-center justify-center py-12 text-center sm:py-16"
         >
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0 }}
+            initial={compactMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={transitionBase}
             className="mb-7 h-px w-16 bg-gradient-to-r from-transparent via-accent/70 to-transparent sm:mb-9 sm:w-20"
@@ -203,15 +226,15 @@ export default function ComingSoonHome() {
           <motion.h1
             aria-label="Muted Studio"
             initial={
-              reduceMotion
+              compactMotion
                 ? false
                 : { opacity: 0, y: 18, scale: 0.985, filter: 'blur(12px)' }
             }
-            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: compactMotion ? 'none' : 'blur(0px)' }}
             transition={{
-              duration: reduceMotion ? 0.01 : 0.88,
+              duration: compactMotion ? 0.01 : 0.88,
               ease: easePremium,
-              delay: reduceMotion ? 0 : 0.22,
+              delay: compactMotion ? 0 : 0.22,
             }}
             className="max-w-[22ch] font-light tracking-[0.11em] text-[clamp(2.1rem,6.7vw,4.9rem)] leading-[1.05] text-white sm:max-w-none sm:tracking-[0.14em]"
           >
@@ -228,7 +251,7 @@ export default function ComingSoonHome() {
           </motion.h1>
 
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+            initial={compactMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 2 }}
             className="mx-auto mt-10 max-w-2xl sm:mt-12"
@@ -239,11 +262,11 @@ export default function ComingSoonHome() {
           </motion.div>
 
           <motion.p
-            initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+            initial={compactMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 3 }}
             className={`mt-8 max-w-3xl text-[clamp(0.96rem,2.65vw,1.28rem)] font-semibold uppercase leading-relaxed tracking-[0.22em] text-white [text-shadow:0_2px_18px_rgba(0,0,0,0.62)] sm:mt-10 sm:tracking-[0.28em] ${
-              reduceMotion ? '' : 'coming-soon-tagline-soft'
+              compactMotion ? '' : 'coming-soon-tagline-soft'
             }`}
           >
             Our new digital experience is coming soon.
@@ -253,54 +276,16 @@ export default function ComingSoonHome() {
             className="mt-10 h-px w-16 bg-gradient-to-r from-transparent via-accent/65 to-transparent sm:mt-12 sm:w-24"
             aria-hidden
           />
-          <footer className="mt-6 w-full max-w-xl sm:mt-8">
-            <div className="rounded-3xl border border-white/20 bg-white/[0.06] shadow-[0_20px_65px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-              <button
-                type="button"
-                onClick={() => setContactOpen((prev) => !prev)}
-                className="group flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.04] focus:outline-none focus-visible:outline-none sm:px-6"
-                aria-expanded={contactOpen}
-                aria-controls="coming-soon-contact-panel"
+          <footer className="mt-6 w-full max-w-xl text-center sm:mt-8">
+            <p className="text-[0.95rem] font-light uppercase leading-relaxed tracking-[0.18em] text-white/72 sm:text-sm sm:tracking-[0.24em]">
+              Contact us at{' '}
+              <a
+                href="mailto:hello@mutedstudio.ca"
+                className="text-[1.02rem] font-normal normal-case tracking-normal text-white/92 underline decoration-white/30 underline-offset-[0.3em] transition-colors hover:text-accent hover:decoration-accent/50 sm:text-base"
               >
-                <span className="text-sm font-medium uppercase tracking-[0.24em] text-white/92 sm:text-base">
-                  Contact Us
-                </span>
-                <motion.span
-                  aria-hidden
-                  animate={{ rotate: contactOpen ? 180 : 0 }}
-                  transition={{ duration: reduceMotion ? 0.01 : 0.35, ease: easePremium }}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/[0.04] text-white/80"
-                >
-                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
-                    <path d="M5 8l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </motion.span>
-              </button>
-
-              <motion.div
-                id="coming-soon-contact-panel"
-                initial={false}
-                animate={{
-                  height: contactOpen ? 'auto' : 0,
-                  opacity: contactOpen ? 1 : 0,
-                  y: contactOpen ? 0 : -8,
-                }}
-                transition={{ duration: reduceMotion ? 0.01 : 0.42, ease: easePremium }}
-                className="overflow-hidden"
-              >
-                <div className="border-t border-white/12 px-5 py-5 text-center sm:px-6">
-                  <p className="text-sm leading-relaxed tracking-[0.04em] text-white/78 sm:text-base">
-                    We are accepting new projects and private consultations.
-                  </p>
-                  <a
-                    href="mailto:hello@mutedstudio.ca"
-                    className="mt-4 inline-flex items-center justify-center rounded-full border border-white/30 bg-white/[0.08] px-6 py-2.5 text-[0.97rem] font-medium tracking-[0.03em] text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:outline-none"
-                  >
-                    hello@mutedstudio.ca
-                  </a>
-                </div>
-              </motion.div>
-            </div>
+                hello@mutedstudio.ca
+              </a>
+            </p>
           </footer>
         </div>
       </motion.div>

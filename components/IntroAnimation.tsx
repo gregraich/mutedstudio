@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import Image from 'next/image'
 import { useTypewriter } from '@/lib/useTypewriter'
@@ -18,24 +18,34 @@ interface IntroAnimationProps {
 
 export default function IntroAnimation({ showIntro, fadeOutIntro, onComplete }: IntroAnimationProps) {
   const reduceMotion = useReducedMotion()
+  const [isSmallScreen, setIsSmallScreen] = useState(false)
   const { displayText, isComplete } = useTypewriter('mut:ed studio', 120)
   const completionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const exitDuration = reduceMotion ? 0.22 : 1.05
-  const exitEase = reduceMotion ? 'easeOut' : easePremium
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsSmallScreen(mediaQuery.matches)
+    update()
+    mediaQuery.addEventListener('change', update)
+    return () => mediaQuery.removeEventListener('change', update)
+  }, [])
+
+  const compactMotion = reduceMotion || isSmallScreen
+  const exitDuration = compactMotion ? 0.28 : 1.05
+  const exitEase = compactMotion ? 'easeOut' : easePremium
 
   useEffect(() => {
     if (!isComplete || !showIntro || fadeOutIntro) return
     completionTimeoutRef.current = setTimeout(() => {
       onComplete()
-    }, 1000)
+    }, compactMotion ? 620 : 1000)
 
     return () => {
       if (completionTimeoutRef.current) {
         clearTimeout(completionTimeoutRef.current)
       }
     }
-  }, [fadeOutIntro, isComplete, onComplete, showIntro])
+  }, [compactMotion, fadeOutIntro, isComplete, onComplete, showIntro])
 
   useEffect(() => {
     return () => {
@@ -88,22 +98,22 @@ export default function IntroAnimation({ showIntro, fadeOutIntro, onComplete }: 
         className="text-center"
         animate={
           fadeOutIntro
-            ? { opacity: 0, y: reduceMotion ? 0 : -12, filter: reduceMotion ? 'blur(0px)' : 'blur(6px)' }
-            : { opacity: 1, y: 0, filter: 'blur(0px)' }
+            ? { opacity: 0, y: compactMotion ? -6 : -12, filter: compactMotion ? 'none' : 'blur(6px)' }
+            : { opacity: 1, y: 0, filter: compactMotion ? 'none' : 'blur(0px)' }
         }
         transition={{
-          duration: reduceMotion ? 0.18 : 0.85,
+          duration: compactMotion ? 0.22 : 0.85,
           ease: exitEase,
         }}
       >
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{
-            scale: fadeOutIntro ? (reduceMotion ? 0.96 : 0.88) : 1,
+            scale: fadeOutIntro ? (compactMotion ? 0.95 : 0.88) : 1,
             opacity: fadeOutIntro ? 0 : 1,
           }}
           transition={{
-            duration: fadeOutIntro ? (reduceMotion ? 0.2 : 0.9) : 0.8,
+            duration: fadeOutIntro ? (compactMotion ? 0.24 : 0.9) : compactMotion ? 0.55 : 0.8,
             ease: exitEase,
           }}
           className="relative mx-auto mb-8 h-[200px] w-[200px]"
