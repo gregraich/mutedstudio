@@ -4,7 +4,7 @@ import { useState } from 'react'
 import SmoothScrollProvider from '@/components/SmoothScrollProvider'
 import ProjectCard from '@/components/ProjectCard'
 import TeamMemberCard from '@/components/TeamMemberCard'
-import IntroAnimation from '@/components/IntroAnimation'
+import IntroAnimation, { INTRO_EXIT_HANDOFF_MS } from '@/components/IntroAnimation'
 import PageTransition from '@/components/PageTransition'
 import { useIntro } from '@/lib/IntroContext'
 
@@ -100,7 +100,7 @@ export default function HomeFull() {
       setTimeout(() => {
         setShowNav(true)
       }, 100)
-    }, 500)
+    }, INTRO_EXIT_HANDOFF_MS)
   }
 
   return (

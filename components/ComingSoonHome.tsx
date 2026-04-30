@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useIntro } from '@/lib/IntroContext'
-import IntroAnimation from '@/components/IntroAnimation'
+import IntroAnimation, { INTRO_EXIT_HANDOFF_MS } from '@/components/IntroAnimation'
 
 const easePremium: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
@@ -16,7 +16,7 @@ export default function ComingSoonHome() {
   const [showIntro, setShowIntro] = useState(true)
   const [fadeOutIntro, setFadeOutIntro] = useState(false)
   const [videoReady, setVideoReady] = useState(false)
-  const [videoPlayable, setVideoPlayable] = useState(true)
+  const [videoFailed, setVideoFailed] = useState(false)
 
   useEffect(() => {
     setShowNav(false)
@@ -30,6 +30,8 @@ export default function ComingSoonHome() {
     video.muted = true
     video.defaultMuted = true
     video.playsInline = true
+    video.setAttribute('muted', '')
+    video.setAttribute('autoplay', '')
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', 'true')
 
@@ -40,27 +42,29 @@ export default function ComingSoonHome() {
           await playPromise
         }
       } catch {
-        // iOS can block autoplay in Low Power mode or strict settings.
-        setVideoPlayable(false)
+        // iOS can reject autoplay promises in Low Power mode/settings.
+        // Do not trigger fallback unless media loading actually fails.
       }
     }
 
     const onCanPlay = () => {
       setVideoReady(true)
+      setVideoFailed(false)
       void attemptPlay()
     }
 
     const onLoadedData = () => {
       setVideoReady(true)
+      setVideoFailed(false)
     }
 
     const onPlaying = () => {
       setVideoReady(true)
-      setVideoPlayable(true)
+      setVideoFailed(false)
     }
 
     const onError = () => {
-      setVideoPlayable(false)
+      setVideoFailed(true)
     }
 
     video.addEventListener('canplay', onCanPlay)
@@ -80,12 +84,12 @@ export default function ComingSoonHome() {
 
   const handleIntroComplete = () => {
     setFadeOutIntro(true)
-    setTimeout(() => {
+    window.setTimeout(() => {
       setShowIntro(false)
-      setTimeout(() => {
+      window.setTimeout(() => {
         setShowNav(true)
-      }, 120)
-    }, 520)
+      }, 80)
+    }, INTRO_EXIT_HANDOFF_MS)
   }
 
   const transitionBase = reduceMotion
@@ -112,12 +116,12 @@ export default function ComingSoonHome() {
               preload="auto"
               poster="/black8.jpg"
               className={`h-full w-full scale-[1.03] object-cover contrast-[1.05] saturate-[1.04] transition-opacity duration-700 ${
-                videoPlayable ? (videoReady ? 'opacity-[0.97]' : 'opacity-[0.92]') : 'opacity-0'
+                videoFailed ? 'opacity-0' : videoReady ? 'opacity-[0.97]' : 'opacity-[0.92]'
               }`}
             >
               <source src="/muted.mp4" type="video/mp4" />
             </video>
-            {!videoPlayable && (
+            {videoFailed && (
               <div className="absolute inset-0">
                 <img
                   src="/black8.jpg"
@@ -131,9 +135,10 @@ export default function ComingSoonHome() {
           </div>
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-[#0a0a0a]/47 to-[#070707]/66" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/38 via-[#0a0a0a]/46 to-[#070707]/64" aria-hidden />
+        <div className="absolute inset-0 bg-black/[0.08]" aria-hidden />
         <div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(193,171,120,0.16),transparent_58%)]"
+          className="absolute inset-0 bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(155,180,212,0.18),transparent_58%)]"
           aria-hidden
         />
         <div
@@ -146,10 +151,6 @@ export default function ComingSoonHome() {
         />
         <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.42)]" aria-hidden />
         <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-[#070707]/72 via-[#070707]/32 to-transparent" aria-hidden />
-        <div
-          className="absolute left-1/2 top-[58%] h-[20%] w-[min(92vw,44rem)] -translate-x-1/2 bg-[radial-gradient(ellipse_70%_65%_at_50%_50%,rgba(0,0,0,0.34),rgba(0,0,0,0)_100%)]"
-          aria-hidden
-        />
 
         <div
           className="absolute inset-0 opacity-[0.025] mix-blend-soft-light"
@@ -165,8 +166,22 @@ export default function ComingSoonHome() {
         )}
       </div>
 
-      <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col px-6 sm:px-10 lg:px-16">
-        <div className="flex flex-1 flex-col items-center justify-center py-12 text-center sm:py-16">
+      <motion.div
+        className="relative z-10 flex min-h-[100dvh] flex-1 flex-col px-6 sm:px-10 lg:px-16"
+        initial={false}
+        animate={{
+          opacity: fadeOutIntro || !showIntro ? 1 : 0,
+        }}
+        transition={{
+          duration: reduceMotion ? 0.2 : 0.95,
+          ease: easePremium,
+          delay: reduceMotion ? 0 : fadeOutIntro ? 0.08 : 0,
+        }}
+      >
+        <div
+          key={fadeOutIntro ? 'coming-soon-reveal' : 'coming-soon-pending'}
+          className="flex flex-1 flex-col items-center justify-center py-12 text-center sm:py-16"
+        >
           <motion.div
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -175,21 +190,39 @@ export default function ComingSoonHome() {
           />
 
           <motion.h1
-            initial={reduceMotion ? false : { opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transitionBase, delay: stagger }}
-            className="max-w-[18ch] font-light tracking-[0.28em] text-[clamp(2rem,6.5vw,4.75rem)] leading-[1.05] text-white sm:max-w-none sm:tracking-[0.34em]"
+            aria-label="Muted Studio"
+            initial={
+              reduceMotion
+                ? false
+                : { opacity: 0, y: 18, scale: 0.985, filter: 'blur(12px)' }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            transition={{
+              duration: reduceMotion ? 0.01 : 0.88,
+              ease: easePremium,
+              delay: reduceMotion ? 0 : 0.22,
+            }}
+            className="max-w-[22ch] font-light tracking-[0.11em] text-[clamp(2.1rem,6.7vw,4.9rem)] leading-[1.05] text-white sm:max-w-none sm:tracking-[0.14em]"
           >
-            MUTED STUDIO
+            <span className="inline-flex flex-wrap items-center justify-center gap-x-[0.03em]">
+              <span>MUT</span>
+              <span
+                className="inline-flex h-[1lh] shrink-0 items-center justify-center self-center font-light leading-none text-[#d8d2c8] -translate-y-[0.11em]"
+                aria-hidden
+              >
+                :
+              </span>
+              <span>ED STUDIO</span>
+            </span>
           </motion.h1>
 
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 2 }}
-            className="mx-auto mt-10 max-w-xl sm:mt-12"
+            className="mx-auto mt-10 max-w-2xl sm:mt-12"
           >
-            <p className="text-[clamp(1rem,2.4vw,1.2rem)] font-light leading-relaxed tracking-[0.06em] text-white/82">
+            <p className="text-[clamp(1rem,2.2vw,1.18rem)] font-light leading-relaxed tracking-[0.05em] text-white/90 [text-shadow:0_2px_14px_rgba(0,0,0,0.5)]">
               A design-build firm that creates refined, thoughtfully curated environments and landscapes.
             </p>
           </motion.div>
@@ -198,8 +231,8 @@ export default function ComingSoonHome() {
             initial={reduceMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 3 }}
-            className={`mt-8 max-w-2xl px-3 py-2 text-[clamp(0.8rem,2.1vw,0.95rem)] font-semibold uppercase leading-relaxed tracking-[0.34em] text-white/94 [text-shadow:0_2px_10px_rgba(0,0,0,0.58)] sm:mt-10 sm:px-4 sm:tracking-[0.4em] ${
-              reduceMotion ? 'text-muted' : 'coming-soon-tagline'
+            className={`mt-8 max-w-3xl text-[clamp(0.96rem,2.65vw,1.28rem)] font-semibold uppercase leading-relaxed tracking-[0.22em] text-white [text-shadow:0_2px_18px_rgba(0,0,0,0.62)] sm:mt-10 sm:tracking-[0.28em] ${
+              reduceMotion ? '' : 'coming-soon-tagline-soft'
             }`}
           >
             Our new digital experience is coming soon.
@@ -228,7 +261,7 @@ export default function ComingSoonHome() {
             </p>
           </footer>
         </motion.div>
-      </div>
+      </motion.div>
     </main>
   )
 }

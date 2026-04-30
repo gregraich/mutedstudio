@@ -45,8 +45,8 @@ module.exports = {
           '100%': { transform: 'scale(0.1)', filter: 'brightness(0.3)' },
         },
         glowPulse: {
-          '0%, 100%': { filter: 'brightness(1) drop-shadow(0 0 20px rgba(193, 171, 120, 0.3))' },
-          '50%': { filter: 'brightness(1.2) drop-shadow(0 0 30px rgba(193, 171, 120, 0.6))' },
+          '0%, 100%': { filter: 'brightness(1) drop-shadow(0 0 20px rgba(155, 180, 212, 0.32))' },
+          '50%': { filter: 'brightness(1.2) drop-shadow(0 0 30px rgba(155, 180, 212, 0.55))' },
         },
       },
       fontFamily: {

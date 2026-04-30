@@ -8,7 +8,7 @@
   :root {
     --background: #0d0d0d;
     --foreground: #f5f5f5;
-    --accent: #c1ab78;
+    --accent: #9bb4d4;
     --muted: #666666;
     --border: #2a2a2a;
   }
@@ -165,8 +165,8 @@
 }
 
 @keyframes glowPulse {
-  0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(193, 171, 120, 0.3)); }
-  50% { filter: brightness(1.2) drop-shadow(0 0 30px rgba(193, 171, 120, 0.6)); }
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(155, 180, 212, 0.32)); }
+  50% { filter: brightness(1.2) drop-shadow(0 0 30px rgba(155, 180, 212, 0.55)); }
 }
 
 @keyframes typewriter {
@@ -213,48 +213,31 @@
     animation: none !important;
   }
 
-  .coming-soon-tagline {
+  .coming-soon-tagline-soft {
     animation: none !important;
-    background: none !important;
-    -webkit-text-fill-color: unset !important;
-    color: rgb(163 163 163) !important;
-    filter: none !important;
+    text-shadow: none !important;
   }
 }
 
-/* Coming soon: soft flowing shimmer + glow on tagline */
-@keyframes comingSoonTaglineLux {
+/* Coming soon: subtle premium pulse safe across Safari/iOS */
+@keyframes comingSoonTaglineSoft {
   0%,
   100% {
-    background-position: 0% 50%;
-    filter: drop-shadow(0 0 10px rgba(193, 171, 120, 0.14))
-      drop-shadow(0 0 36px rgba(193, 171, 120, 0.06));
+    opacity: 0.9;
+    text-shadow:
+      0 0 10px rgba(155, 180, 212, 0.16),
+      0 2px 10px rgba(0, 0, 0, 0.56);
   }
   50% {
-    background-position: 100% 50%;
-    filter: drop-shadow(0 0 22px rgba(193, 171, 120, 0.32))
-      drop-shadow(0 0 52px rgba(245, 245, 245, 0.06));
+    opacity: 1;
+    text-shadow:
+      0 0 18px rgba(155, 180, 212, 0.28),
+      0 2px 10px rgba(0, 0, 0, 0.56);
   }
 }
 
-.coming-soon-tagline {
-  background-image: linear-gradient(
-    100deg,
-    rgba(140, 140, 140, 0.88) 0%,
-    rgba(175, 168, 150, 0.95) 22%,
-    rgba(193, 171, 120, 1) 38%,
-    rgba(245, 243, 238, 0.98) 50%,
-    rgba(193, 171, 120, 0.98) 62%,
-    rgba(150, 148, 142, 0.9) 82%,
-    rgba(120, 120, 120, 0.85) 100%
-  );
-  background-size: 240% 100%;
-  background-position: 0% 50%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  animation: comingSoonTaglineLux 16s ease-in-out infinite;
+.coming-soon-tagline-soft {
+  animation: comingSoonTaglineSoft 9s ease-in-out infinite;
 }
 
 /* Grid System */
