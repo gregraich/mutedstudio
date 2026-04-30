@@ -216,7 +216,7 @@ export default function ComingSoonHome() {
       >
         <div
           key={fadeOutIntro ? 'coming-soon-reveal' : 'coming-soon-pending'}
-          className="flex flex-1 flex-col items-center justify-center py-10 text-center sm:py-16"
+          className="flex flex-1 flex-col items-center justify-center py-11 text-center sm:py-16"
         >
           <motion.div
             initial={compactMotion ? false : { opacity: 0 }}
@@ -238,7 +238,7 @@ export default function ComingSoonHome() {
               ease: easePremium,
               delay: compactMotion ? 0 : 0.22,
             }}
-            className="max-w-[20ch] font-light tracking-[0.09em] text-[clamp(1.95rem,9.2vw,4.9rem)] leading-[1.06] text-white sm:max-w-none sm:tracking-[0.14em]"
+            className="max-w-[21ch] font-light tracking-[0.1em] text-[clamp(1.98rem,8.9vw,4.9rem)] leading-[1.08] text-white sm:max-w-none sm:tracking-[0.14em]"
           >
             <span className="inline-flex flex-wrap items-center justify-center gap-x-[0.03em]">
               <span>MUT</span>
@@ -256,9 +256,9 @@ export default function ComingSoonHome() {
             initial={compactMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 2 }}
-            className="mx-auto mt-8 max-w-[34ch] sm:mt-12 sm:max-w-2xl"
+            className="mx-auto mt-9 max-w-[36ch] sm:mt-12 sm:max-w-2xl"
           >
-            <p className="text-[clamp(1.02rem,4vw,1.18rem)] font-light leading-[1.68] tracking-[0.03em] text-white/90 [text-shadow:0_2px_14px_rgba(0,0,0,0.5)] sm:tracking-[0.05em]">
+            <p className="text-[clamp(1.03rem,4.1vw,1.18rem)] font-light leading-[1.75] tracking-[0.035em] text-white/90 [text-shadow:0_2px_14px_rgba(0,0,0,0.5)] sm:tracking-[0.05em]">
               A design-build firm that creates refined, thoughtfully curated environments and landscapes.
             </p>
           </motion.div>
@@ -267,7 +267,7 @@ export default function ComingSoonHome() {
             initial={compactMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 3 }}
-            className={`mt-7 max-w-[29ch] text-[clamp(0.98rem,4.3vw,1.28rem)] font-semibold uppercase leading-[1.55] tracking-[0.14em] text-white [text-shadow:0_2px_18px_rgba(0,0,0,0.62)] sm:mt-10 sm:max-w-3xl sm:tracking-[0.28em] ${
+            className={`mt-7 max-w-[31ch] text-[clamp(0.99rem,4.2vw,1.28rem)] font-semibold uppercase leading-[1.62] tracking-[0.155em] text-white [text-shadow:0_2px_18px_rgba(0,0,0,0.62)] sm:mt-10 sm:max-w-3xl sm:tracking-[0.28em] ${
               compactMotion ? '' : 'coming-soon-tagline-soft'
             }`}
           >
@@ -279,9 +279,9 @@ export default function ComingSoonHome() {
           initial={compactMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ ...transitionBase, delay: compactMotion ? 0 : 0.45 }}
-          className="w-full pb-[max(1.4rem,env(safe-area-inset-bottom))]"
+          className="w-full pb-[max(1.4rem,env(safe-area-inset-bottom))] sm:pb-[max(3.2rem,env(safe-area-inset-bottom))] lg:pb-[max(5rem,env(safe-area-inset-bottom))]"
         >
-          <div className="mx-auto h-[190px] w-full max-w-xl text-center">
+          <div className="mx-auto h-[188px] w-full max-w-xl text-center sm:h-[220px] lg:h-[236px]">
             <div
               className="mx-auto h-px w-16 bg-gradient-to-r from-transparent via-accent/65 to-transparent sm:w-24"
               aria-hidden
@@ -291,7 +291,7 @@ export default function ComingSoonHome() {
               <button
                 type="button"
                 onClick={() => setContactOpen((prev) => !prev)}
-                className="mx-auto inline-flex min-h-[46px] items-center justify-center gap-2.5 px-2 text-[1rem] font-normal uppercase tracking-[0.21em] text-white/92 transition-colors hover:text-white focus:outline-none sm:text-[1.05rem] sm:tracking-[0.24em]"
+                className="mx-auto inline-flex min-h-[44px] items-center justify-center gap-2 px-2 text-[0.9rem] font-normal uppercase tracking-[0.18em] text-white/90 transition-colors hover:text-white focus:outline-none sm:min-h-[46px] sm:text-[1.05rem] sm:tracking-[0.24em]"
                 aria-expanded={contactOpen}
                 aria-controls="coming-soon-contact-panel"
               >
@@ -300,7 +300,7 @@ export default function ComingSoonHome() {
                   aria-hidden
                   animate={{ rotate: contactOpen ? 45 : 0 }}
                   transition={{ duration: compactMotion ? 0.01 : 0.32, ease: easePremium }}
-                  className="inline-block text-[1.16rem] leading-none text-accent/90"
+                  className="inline-block text-[0.98rem] leading-none text-accent/90 sm:text-[1.16rem]"
                 >
                   +
                 </motion.span>
@@ -314,11 +314,11 @@ export default function ComingSoonHome() {
                   y: contactOpen ? 0 : -10,
                 }}
                 transition={{ duration: compactMotion ? 0.01 : 0.38, ease: easePremium }}
-                className={`absolute inset-x-0 top-[calc(100%+0.6rem)] mx-auto w-full max-w-lg overflow-hidden ${
+                className={`absolute inset-x-0 top-[calc(100%+0.72rem)] mx-auto w-full max-w-lg overflow-hidden sm:top-[calc(100%+0.9rem)] ${
                   contactOpen ? 'pointer-events-auto' : 'pointer-events-none'
                 }`}
               >
-                <div className="mx-4 rounded-xl border border-white/12 bg-black/20 px-4 py-3 backdrop-blur-sm sm:mx-0 sm:px-5">
+                <div className="mx-4 rounded-xl border border-white/12 bg-black/20 px-4 py-3 backdrop-blur-sm sm:mx-0 sm:px-5 sm:py-4">
                   <a
                     href="mailto:hello@mutedstudio.ca"
                     className="inline-block py-1 text-[1rem] font-normal tracking-[0.01em] text-white underline decoration-white/35 underline-offset-[0.32em] transition-colors hover:text-accent hover:decoration-accent/50 sm:text-[1.08rem]"
