@@ -17,6 +17,7 @@ export default function ComingSoonHome() {
   const [fadeOutIntro, setFadeOutIntro] = useState(false)
   const [videoReady, setVideoReady] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
+  const [contactOpen, setContactOpen] = useState(false)
 
   useEffect(() => {
     setShowNav(false)
@@ -25,8 +26,6 @@ export default function ComingSoonHome() {
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-
-    let fallbackTimeout: ReturnType<typeof setTimeout> | null = null
 
     // Reinforce iOS/Safari inline-autoplay requirements on the actual DOM node.
     video.muted = true
@@ -66,16 +65,16 @@ export default function ComingSoonHome() {
     }
 
     const onError = () => {
-      const errorCode = video.error?.code
-      const hasKnownSource =
-        Boolean(video.currentSrc) ||
-        Array.from(video.querySelectorAll('source')).some((sourceEl) => Boolean(sourceEl.src))
-      const hasLoadedData = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
-
-      // iOS Safari can fire transient errors before media settles; only fall back on definitive source failures.
-      if (!hasLoadedData && (!hasKnownSource || errorCode === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)) {
+      // Only fail over on definitive source failure.
+      if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
         setVideoFailed(true)
+        return
       }
+
+      // Safari/iOS can emit transient media errors while still recovering.
+      // Keep the video path alive and retry playback.
+      setVideoFailed(false)
+      void attemptPlay()
     }
 
     video.addEventListener('canplay', onCanPlay)
@@ -83,19 +82,9 @@ export default function ComingSoonHome() {
     video.addEventListener('playing', onPlaying)
     video.addEventListener('error', onError)
 
-    fallbackTimeout = setTimeout(() => {
-      const hasLoadedData = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
-      if (!hasLoadedData) {
-        setVideoFailed(true)
-      }
-    }, 6500)
-
     void attemptPlay()
 
     return () => {
-      if (fallbackTimeout) {
-        clearTimeout(fallbackTimeout)
-      }
       video.removeEventListener('canplay', onCanPlay)
       video.removeEventListener('loadeddata', onLoadedData)
       video.removeEventListener('playing', onPlaying)
@@ -264,22 +253,60 @@ export default function ComingSoonHome() {
           initial={reduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ ...transitionBase, delay: reduceMotion ? 0 : 0.45 }}
-          className="mt-auto flex w-full flex-col items-center pb-[max(2rem,env(safe-area-inset-bottom))] pt-4"
+          className="flex w-full flex-col items-center pb-[max(4.5rem,env(safe-area-inset-bottom))] pt-10"
         >
           <div
             className="h-px w-16 bg-gradient-to-r from-transparent via-accent/65 to-transparent sm:w-24"
             aria-hidden
           />
-          <footer className="mt-6 w-full max-w-xl text-center sm:mt-8">
-            <p className="text-[0.8rem] font-light uppercase leading-relaxed tracking-[0.26em] text-white/50 sm:text-sm sm:tracking-[0.3em]">
-              Contact us at{' '}
-              <a
-                href="mailto:hello@mutedstudio.ca"
-                className="text-[0.88rem] font-normal normal-case tracking-normal text-white/88 underline decoration-white/25 underline-offset-[0.35em] transition-colors hover:text-accent hover:decoration-accent/50 sm:text-base"
+          <footer className="mt-6 w-full max-w-xl sm:mt-8">
+            <div className="rounded-3xl border border-white/20 bg-white/[0.06] shadow-[0_20px_65px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+              <button
+                type="button"
+                onClick={() => setContactOpen((prev) => !prev)}
+                className="group flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.04] focus:outline-none focus-visible:outline-none sm:px-6"
+                aria-expanded={contactOpen}
+                aria-controls="coming-soon-contact-panel"
               >
-                hello@mutedstudio.ca
-              </a>
-            </p>
+                <span className="text-sm font-medium uppercase tracking-[0.24em] text-white/92 sm:text-base">
+                  Contact Us
+                </span>
+                <motion.span
+                  aria-hidden
+                  animate={{ rotate: contactOpen ? 180 : 0 }}
+                  transition={{ duration: reduceMotion ? 0.01 : 0.35, ease: easePremium }}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/[0.04] text-white/80"
+                >
+                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
+                    <path d="M5 8l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </motion.span>
+              </button>
+
+              <motion.div
+                id="coming-soon-contact-panel"
+                initial={false}
+                animate={{
+                  height: contactOpen ? 'auto' : 0,
+                  opacity: contactOpen ? 1 : 0,
+                  y: contactOpen ? 0 : -8,
+                }}
+                transition={{ duration: reduceMotion ? 0.01 : 0.42, ease: easePremium }}
+                className="overflow-hidden"
+              >
+                <div className="border-t border-white/12 px-5 py-5 text-center sm:px-6">
+                  <p className="text-sm leading-relaxed tracking-[0.04em] text-white/78 sm:text-base">
+                    We are accepting new projects and private consultations.
+                  </p>
+                  <a
+                    href="mailto:hello@mutedstudio.ca"
+                    className="mt-4 inline-flex items-center justify-center rounded-full border border-white/30 bg-white/[0.08] px-6 py-2.5 text-[0.97rem] font-medium tracking-[0.03em] text-white transition-colors hover:bg-white/[0.16] focus:outline-none focus-visible:outline-none"
+                  >
+                    hello@mutedstudio.ca
+                  </a>
+                </div>
+              </motion.div>
+            </div>
           </footer>
         </motion.div>
       </motion.div>
