@@ -211,7 +211,7 @@ export default function ComingSoonHome() {
       </div>
 
       <motion.div
-        className="relative z-10 flex min-h-[100svh] flex-1 flex-col px-4 pt-[max(0.85rem,env(safe-area-inset-top))] sm:min-h-[100dvh] sm:px-10 sm:pt-0 lg:px-16"
+        className="relative z-10 flex min-h-[100svh] flex-1 flex-col px-5 pt-[max(0.85rem,env(safe-area-inset-top))] sm:min-h-[100dvh] sm:px-10 sm:pt-0 lg:px-16"
         initial={false}
         animate={{
           opacity: fadeOutIntro || !showIntro ? 1 : 0,
@@ -242,7 +242,7 @@ export default function ComingSoonHome() {
                 'radial-gradient(ellipse 72% 62% at 50% 44%, rgba(7,7,7,0.52) 0%, rgba(7,7,7,0.2) 48%, transparent 72%)',
             }}
           />
-          <div className="relative z-10 flex w-full max-w-[min(100%,19.5rem)] flex-col items-center px-4 text-center sm:max-w-4xl sm:px-0">
+          <div className="relative z-10 flex w-full max-w-[min(100%,21rem)] flex-col items-center px-0 text-center sm:max-w-4xl sm:px-0">
           <motion.div
             initial={compactMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -263,7 +263,7 @@ export default function ComingSoonHome() {
               ease: easePremium,
               delay: compactMotion ? 0 : 0.22,
             }}
-            className="max-w-[19ch] font-normal tracking-[0.11em] text-[clamp(1.7rem,7.25vw,2.18rem)] leading-[1.08] text-white [text-shadow:0_1px_18px_rgba(0,0,0,0.35)] sm:max-w-none sm:font-light sm:text-[clamp(1.85rem,8.2vw,4.9rem)] sm:leading-[1.1] sm:tracking-[0.14em] sm:[text-shadow:none]"
+            className="max-w-[20ch] font-normal tracking-[0.108em] text-[clamp(1.88rem,7.85vw,2.35rem)] leading-[1.07] text-white [text-shadow:0_1px_18px_rgba(0,0,0,0.35)] sm:max-w-none sm:font-light sm:text-[clamp(1.85rem,8.2vw,4.9rem)] sm:leading-[1.1] sm:tracking-[0.14em] sm:[text-shadow:none]"
           >
             <span className="inline-flex flex-wrap items-center justify-center gap-x-[0.04em]">
               <span>MUT</span>
@@ -281,9 +281,9 @@ export default function ComingSoonHome() {
             initial={compactMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 2 }}
-            className="mx-auto mt-5 max-w-[23ch] sm:mt-12 sm:max-w-2xl"
+            className="mx-auto mt-5 max-w-[26ch] sm:mt-12 sm:max-w-2xl"
           >
-            <p className="text-[0.8125rem] font-light leading-[1.72] tracking-[0.018em] text-white/[0.9] [text-shadow:0_1px_12px_rgba(0,0,0,0.48),0_0_1px_rgba(0,0,0,0.4)] sm:text-[clamp(1.02rem,4.4vw,1.18rem)] sm:leading-[1.78] sm:tracking-[0.05em] sm:text-white/92 sm:[text-shadow:0_2px_14px_rgba(0,0,0,0.52)]">
+            <p className="text-[clamp(0.9375rem,calc(0.82rem+1.1vw),1.0625rem)] font-light leading-[1.68] tracking-[0.015em] text-white/[0.91] [text-shadow:0_1px_12px_rgba(0,0,0,0.48),0_0_1px_rgba(0,0,0,0.4)] sm:text-[clamp(1.02rem,4.4vw,1.18rem)] sm:leading-[1.78] sm:tracking-[0.05em] sm:text-white/92 sm:[text-shadow:0_2px_14px_rgba(0,0,0,0.52)]">
               A design-build firm that creates refined, thoughtfully curated environments and landscapes.
             </p>
           </motion.div>
@@ -292,7 +292,7 @@ export default function ComingSoonHome() {
             initial={compactMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 3 }}
-            className={`mt-3 max-w-[22ch] text-balance text-[0.6875rem] font-semibold uppercase leading-[1.58] tracking-[0.17em] text-white/[0.93] sm:mt-10 sm:max-w-3xl sm:text-[clamp(0.97rem,4.1vw,1.28rem)] sm:leading-[1.68] sm:tracking-[0.28em] ${
+            className={`mt-3 max-w-[24ch] text-balance text-[clamp(0.78125rem,calc(0.68rem+0.85vw),0.84375rem)] font-semibold uppercase leading-[1.55] tracking-[0.155em] text-white/[0.94] sm:mt-10 sm:max-w-3xl sm:text-[clamp(0.97rem,4.1vw,1.28rem)] sm:leading-[1.68] sm:tracking-[0.28em] ${
               reduceMotion
                 ? '[text-shadow:0_2px_12px_rgba(0,0,0,0.55)]'
                 : compactMotion
@@ -315,7 +315,7 @@ export default function ComingSoonHome() {
               <button
                 type="button"
                 onClick={() => setContactOpen((prev) => !prev)}
-                className="coming-soon-contact-trigger mx-auto inline-flex min-h-[44px] max-sm:w-full max-sm:max-w-[15.5rem] touch-manipulation items-center justify-center gap-[0.42em] border-0 bg-transparent px-4 py-3 text-[0.65625rem] font-medium uppercase tracking-[0.2em] text-white/[0.72] outline-none ring-0 transition-[color,opacity] duration-300 ease-out [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none max-sm:hover:text-white/[0.88] max-sm:active:opacity-75 sm:min-h-[46px] sm:w-auto sm:max-w-none sm:px-2 sm:py-0 sm:text-[1.05rem] sm:font-normal sm:tracking-[0.24em] sm:text-white/88 sm:hover:text-inherit sm:active:opacity-90"
+                className="coming-soon-contact-trigger mx-auto inline-flex min-h-[44px] max-sm:w-full max-sm:max-w-[17rem] touch-manipulation items-center justify-center gap-[0.42em] border-0 bg-transparent px-4 py-3 text-[clamp(0.75rem,calc(0.65rem+0.95vw),0.8125rem)] font-medium uppercase tracking-[0.185em] text-white/[0.76] outline-none ring-0 transition-[color,opacity] duration-300 ease-out [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none max-sm:hover:text-white/[0.9] max-sm:active:opacity-75 sm:min-h-[46px] sm:w-auto sm:max-w-none sm:px-2 sm:py-0 sm:text-[1.05rem] sm:font-normal sm:tracking-[0.24em] sm:text-white/88 sm:hover:text-inherit sm:active:opacity-90"
                 aria-expanded={contactOpen}
                 aria-controls="coming-soon-contact-panel"
               >
@@ -327,7 +327,7 @@ export default function ComingSoonHome() {
                     duration: reduceMotion ? 0.01 : 0.45,
                     ease: easePremium,
                   }}
-                  className="inline-block translate-y-[0.04em] text-[0.62rem] font-light leading-none text-accent/55 sm:translate-y-0 sm:text-[1.16rem] sm:text-accent/85 sm:opacity-100"
+                  className="inline-block translate-y-[0.04em] text-[clamp(0.71875rem,calc(0.62rem+0.9vw),0.78125rem)] font-light leading-none text-accent/58 sm:translate-y-0 sm:text-[1.16rem] sm:text-accent/85 sm:opacity-100"
                 >
                   +
                 </motion.span>
@@ -353,11 +353,11 @@ export default function ComingSoonHome() {
                 <div className="mx-auto max-w-lg max-sm:border-t max-sm:border-white/[0.06] max-sm:pt-3.5 sm:mx-4 sm:rounded-xl sm:border sm:border-white/[0.06] sm:bg-white/[0.025] sm:px-5 sm:py-4 sm:shadow-[0_6px_24px_rgba(0,0,0,0.08)] sm:backdrop-blur-lg">
                   <a
                     href="mailto:hello@mutedstudio.ca"
-                    className="coming-soon-contact-mail inline-block py-0.5 text-[0.84375rem] font-normal tracking-[0.04em] text-white/[0.94] underline decoration-white/[0.22] outline-none transition-[color,text-decoration-color] duration-300 [-webkit-tap-highlight-color:transparent] underline-offset-[0.3em] max-sm:decoration-white/[0.18] hover:text-accent hover:decoration-accent/40 focus:outline-none focus-visible:outline-none sm:py-1 sm:text-[1.08rem] sm:font-normal sm:tracking-[0.01em] sm:text-white sm:decoration-white/35"
+                    className="coming-soon-contact-mail inline-block py-0.5 text-[clamp(0.9375rem,calc(0.84rem+1.05vw),1.03125rem)] font-normal tracking-[0.035em] text-white/[0.95] underline decoration-white/[0.24] outline-none transition-[color,text-decoration-color] duration-300 [-webkit-tap-highlight-color:transparent] underline-offset-[0.3em] max-sm:decoration-white/[0.2] hover:text-accent hover:decoration-accent/40 focus:outline-none focus-visible:outline-none sm:py-1 sm:text-[1.08rem] sm:tracking-[0.01em] sm:text-white sm:decoration-white/35"
                   >
                     hello@mutedstudio.ca
                   </a>
-                  <p className="mx-auto mt-2 max-w-[30ch] text-pretty text-[0.640625rem] font-light leading-[1.65] tracking-[0.05em] text-white/[0.52] sm:mt-3 sm:max-w-[42ch] sm:text-[0.9rem] sm:tracking-[0.06em] sm:text-white/68">
+                  <p className="mx-auto mt-2.5 max-w-[32ch] text-pretty text-[clamp(0.75rem,calc(0.68rem+0.75vw),0.8125rem)] font-light leading-[1.62] tracking-[0.048em] text-white/[0.56] sm:mt-3 sm:max-w-[42ch] sm:text-[0.9rem] sm:tracking-[0.06em] sm:text-white/68">
                     We are currently accepting select new client inquiries and project invitations.
                   </p>
                 </div>
