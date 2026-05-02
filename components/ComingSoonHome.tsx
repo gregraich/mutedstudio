@@ -129,7 +129,7 @@ export default function ComingSoonHome() {
   const stagger = compactMotion ? 0 : 0.12
 
   return (
-    <main className="relative flex min-h-[100dvh] flex-col bg-[#070707] text-foreground overflow-hidden">
+    <main className="relative flex min-h-[100svh] flex-col bg-[#070707] text-foreground overflow-hidden sm:min-h-[100dvh]">
       <IntroAnimation showIntro={showIntro} fadeOutIntro={fadeOutIntro} onComplete={handleIntroComplete} />
       <div className="pointer-events-none absolute inset-0 z-0">
         <div className="absolute inset-0 overflow-hidden">
@@ -145,12 +145,12 @@ export default function ComingSoonHome() {
               loop
               preload="auto"
               poster="/black8.jpg"
-              style={{ objectPosition: isSmallScreen ? '56% center' : '50% center' }}
-              className={`h-full w-full ${isSmallScreen ? 'scale-[1.01]' : 'scale-[1.03]'} object-cover contrast-[1.05] saturate-[1.04] transition-opacity duration-700 ${
+              className={`h-full w-full object-cover object-[50%_44%] transition-opacity duration-700 sm:object-center ${
+                isSmallScreen ? 'scale-100 contrast-100 saturate-100' : 'scale-[1.03] contrast-[1.05] saturate-[1.04]'
+              } ${
                 videoFailed ? 'opacity-0' : videoReady ? 'opacity-[0.97]' : 'opacity-[0.92]'
               }`}
             >
-              <source src="/muted-ios.mp4" type='video/mp4; codecs="avc1.42E01F"' />
               <source src="/muted.mp4" type="video/mp4" />
             </video>
             {videoFailed && (
@@ -203,7 +203,7 @@ export default function ComingSoonHome() {
       </div>
 
       <motion.div
-        className="relative z-10 flex min-h-[100dvh] flex-1 flex-col px-5 pt-[max(1.1rem,env(safe-area-inset-top))] sm:px-10 sm:pt-0 lg:px-16"
+        className="relative z-10 flex min-h-[100svh] flex-1 flex-col px-4 pt-[max(0.85rem,env(safe-area-inset-top))] sm:min-h-[100dvh] sm:px-10 sm:pt-0 lg:px-16"
         initial={false}
         animate={{
           opacity: fadeOutIntro || !showIntro ? 1 : 0,
@@ -216,13 +216,23 @@ export default function ComingSoonHome() {
       >
         <div
           key={fadeOutIntro ? 'coming-soon-reveal' : 'coming-soon-pending'}
-          className="flex flex-1 flex-col items-center justify-center py-11 text-center sm:py-16"
+          className="relative isolate flex flex-1 flex-col items-center justify-center py-8 text-center sm:py-16"
         >
+          <div
+            className="pointer-events-none absolute inset-x-[-2%] top-[0%] bottom-[2%] z-0 sm:inset-x-0 sm:top-[4%] sm:bottom-[8%]"
+            aria-hidden
+            style={{
+              background: isSmallScreen
+                ? 'radial-gradient(ellipse 78% 68% at 50% 42%, rgba(7,7,7,0.58) 0%, rgba(7,7,7,0.24) 50%, transparent 74%)'
+                : 'radial-gradient(ellipse 72% 62% at 50% 44%, rgba(7,7,7,0.52) 0%, rgba(7,7,7,0.2) 48%, transparent 72%)',
+            }}
+          />
+          <div className="relative z-10 flex w-full max-w-[min(100%,36rem)] flex-col items-center px-1 text-center sm:max-w-4xl sm:px-0">
           <motion.div
             initial={compactMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={transitionBase}
-            className="mb-7 h-px w-16 bg-gradient-to-r from-transparent via-accent/70 to-transparent sm:mb-9 sm:w-20"
+            className="mb-5 h-px w-16 bg-gradient-to-r from-transparent via-accent/70 to-transparent sm:mb-9 sm:w-20"
           />
 
           <motion.h1
@@ -238,7 +248,7 @@ export default function ComingSoonHome() {
               ease: easePremium,
               delay: compactMotion ? 0 : 0.22,
             }}
-            className="max-w-[21ch] font-light tracking-[0.1em] text-[clamp(1.98rem,8.9vw,4.9rem)] leading-[1.08] text-white sm:max-w-none sm:tracking-[0.14em]"
+            className="max-w-[22ch] font-light tracking-[0.095em] text-[clamp(1.85rem,8.2vw,4.9rem)] leading-[1.1] text-white sm:max-w-none sm:tracking-[0.14em]"
           >
             <span className="inline-flex flex-wrap items-center justify-center gap-x-[0.03em]">
               <span>MUT</span>
@@ -256,9 +266,9 @@ export default function ComingSoonHome() {
             initial={compactMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 2 }}
-            className="mx-auto mt-9 max-w-[36ch] sm:mt-12 sm:max-w-2xl"
+            className="mx-auto mt-7 max-w-[min(100%,38ch)] sm:mt-12 sm:max-w-2xl"
           >
-            <p className="text-[clamp(1.03rem,4.1vw,1.18rem)] font-light leading-[1.75] tracking-[0.035em] text-white/90 [text-shadow:0_2px_14px_rgba(0,0,0,0.5)] sm:tracking-[0.05em]">
+            <p className="text-[clamp(1.02rem,4.4vw,1.18rem)] font-light leading-[1.78] tracking-[0.032em] text-white/92 [text-shadow:0_2px_14px_rgba(0,0,0,0.52)] sm:tracking-[0.05em]">
               A design-build firm that creates refined, thoughtfully curated environments and landscapes.
             </p>
           </motion.div>
@@ -267,40 +277,42 @@ export default function ComingSoonHome() {
             initial={compactMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 3 }}
-            className={`mt-7 max-w-[31ch] text-[clamp(0.99rem,4.2vw,1.28rem)] font-semibold uppercase leading-[1.62] tracking-[0.155em] text-white [text-shadow:0_2px_18px_rgba(0,0,0,0.62)] sm:mt-10 sm:max-w-3xl sm:tracking-[0.28em] ${
-              compactMotion ? '' : 'coming-soon-tagline-soft'
+            className={`mt-6 max-w-[min(100%,33ch)] text-[clamp(0.97rem,4.1vw,1.28rem)] font-semibold uppercase leading-[1.68] tracking-[0.14em] text-white sm:mt-10 sm:max-w-3xl sm:tracking-[0.28em] ${
+              reduceMotion
+                ? '[text-shadow:0_2px_12px_rgba(0,0,0,0.55)]'
+                : compactMotion
+                  ? 'coming-soon-tagline-illume-static'
+                  : 'coming-soon-tagline-illume'
             }`}
           >
             Our new digital experience is coming soon.
           </motion.p>
-        </div>
+          </div>
 
-        <motion.div
-          initial={compactMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ ...transitionBase, delay: compactMotion ? 0 : 0.45 }}
-          className="w-full pb-[max(1.4rem,env(safe-area-inset-bottom))] sm:pb-[max(3.2rem,env(safe-area-inset-bottom))] lg:pb-[max(5rem,env(safe-area-inset-bottom))]"
-        >
-          <div className="mx-auto h-[188px] w-full max-w-xl text-center sm:h-[220px] lg:h-[236px]">
+        <div className="relative z-10 mt-8 w-full max-sm:max-w-[min(100%,22rem)] pb-[max(2.25rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
+          <div className="mx-auto min-h-[200px] w-full max-w-xl text-center sm:min-h-[220px] lg:min-h-[236px]">
             <div
               className="mx-auto h-px w-16 bg-gradient-to-r from-transparent via-accent/65 to-transparent sm:w-24"
               aria-hidden
             />
-            <footer className="relative mt-5">
-              <div className="mx-auto w-full max-w-lg rounded-2xl border border-white/20 bg-black/28 px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.35)] backdrop-blur-md sm:px-5">
+            <footer className="relative mt-3 sm:mt-4">
+              <div className="mx-auto w-full max-w-lg transform-gpu rounded-2xl border border-white/[0.07] bg-[rgba(7,7,7,0.42)] px-3 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-md sm:bg-white/[0.018] sm:px-5 sm:py-3 sm:backdrop-blur-xl">
               <button
                 type="button"
                 onClick={() => setContactOpen((prev) => !prev)}
-                className="mx-auto inline-flex min-h-[44px] items-center justify-center gap-2 px-2 text-[0.9rem] font-normal uppercase tracking-[0.18em] text-white/90 transition-colors hover:text-white focus:outline-none sm:min-h-[46px] sm:text-[1.05rem] sm:tracking-[0.24em]"
+                className="coming-soon-contact-trigger mx-auto inline-flex min-h-[48px] w-full max-w-full touch-manipulation items-center justify-center gap-2.5 px-3 text-[0.88rem] font-normal uppercase tracking-[0.16em] text-white/88 outline-none ring-0 transition-[color,opacity] duration-300 ease-out [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none active:opacity-90 sm:min-h-[46px] sm:w-auto sm:max-w-none sm:px-2 sm:text-[1.05rem] sm:tracking-[0.24em]"
                 aria-expanded={contactOpen}
                 aria-controls="coming-soon-contact-panel"
               >
                 <span>Contact Us</span>
                 <motion.span
                   aria-hidden
-                  animate={{ rotate: contactOpen ? 45 : 0 }}
-                  transition={{ duration: compactMotion ? 0.01 : 0.32, ease: easePremium }}
-                  className="inline-block text-[0.98rem] leading-none text-accent/90 sm:text-[1.16rem]"
+                  animate={{ rotate: contactOpen ? 45 : 0, opacity: contactOpen ? 0.92 : 1 }}
+                  transition={{
+                    duration: reduceMotion ? 0.01 : 0.45,
+                    ease: easePremium,
+                  }}
+                  className="inline-block text-[0.98rem] leading-none text-accent/85 sm:text-[1.16rem]"
                 >
                   +
                 </motion.span>
@@ -311,21 +323,26 @@ export default function ComingSoonHome() {
                 initial={false}
                 animate={{
                   opacity: contactOpen ? 1 : 0,
-                  y: contactOpen ? 0 : -10,
+                  y: contactOpen ? 0 : -8,
+                  scale: contactOpen ? 1 : 0.985,
                 }}
-                transition={{ duration: compactMotion ? 0.01 : 0.38, ease: easePremium }}
+                transition={{
+                  duration: reduceMotion ? 0.01 : 0.42,
+                  ease: easePremium,
+                }}
+                style={{ transformOrigin: 'top center' }}
                 className={`absolute inset-x-0 top-[calc(100%+0.72rem)] mx-auto w-full max-w-lg overflow-hidden sm:top-[calc(100%+0.9rem)] ${
                   contactOpen ? 'pointer-events-auto' : 'pointer-events-none'
                 }`}
               >
-                <div className="mx-4 rounded-xl border border-white/12 bg-black/20 px-4 py-3 backdrop-blur-sm sm:mx-0 sm:px-5 sm:py-4">
+                <div className="mx-4 transform-gpu rounded-xl border border-white/[0.06] bg-[rgba(7,7,7,0.48)] px-4 py-3 shadow-[0_6px_24px_rgba(0,0,0,0.08)] backdrop-blur-md sm:bg-white/[0.025] sm:backdrop-blur-lg sm:mx-0 sm:px-5 sm:py-4">
                   <a
                     href="mailto:hello@mutedstudio.ca"
-                    className="inline-block py-1 text-[1rem] font-normal tracking-[0.01em] text-white underline decoration-white/35 underline-offset-[0.32em] transition-colors hover:text-accent hover:decoration-accent/50 sm:text-[1.08rem]"
+                    className="coming-soon-contact-mail inline-block py-1 text-[1rem] font-normal tracking-[0.01em] text-white underline decoration-white/35 underline-offset-[0.32em] outline-none transition-colors [-webkit-tap-highlight-color:transparent] hover:text-accent hover:decoration-accent/50 focus:outline-none focus-visible:outline-none sm:text-[1.08rem]"
                   >
                     hello@mutedstudio.ca
                   </a>
-                  <p className="mx-auto mt-2 max-w-[40ch] text-[0.84rem] font-light leading-relaxed tracking-[0.05em] text-white/68 sm:mt-3 sm:max-w-[42ch] sm:text-[0.9rem] sm:tracking-[0.06em]">
+                  <p className="mx-auto mt-2 max-w-[40ch] text-pretty text-[0.84rem] font-light leading-relaxed tracking-[0.05em] text-white/68 sm:mt-3 sm:max-w-[42ch] sm:text-[0.9rem] sm:tracking-[0.06em]">
                     We are currently accepting select new client inquiries and project invitations.
                   </p>
                 </div>
@@ -333,7 +350,8 @@ export default function ComingSoonHome() {
               </div>
             </footer>
           </div>
-        </motion.div>
+        </div>
+        </div>
       </motion.div>
     </main>
   )

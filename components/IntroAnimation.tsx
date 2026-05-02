@@ -19,7 +19,7 @@ interface IntroAnimationProps {
 export default function IntroAnimation({ showIntro, fadeOutIntro, onComplete }: IntroAnimationProps) {
   const reduceMotion = useReducedMotion()
   const [isSmallScreen, setIsSmallScreen] = useState(false)
-  const { displayText, isComplete } = useTypewriter('mut:ed studio', 120)
+  const { displayText, isComplete } = useTypewriter('mut:ed studio', isSmallScreen ? 88 : 120)
   const completionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function IntroAnimation({ showIntro, fadeOutIntro, onComplete }: 
         duration: exitDuration,
         ease: exitEase,
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black px-5 sm:px-8"
       style={{ willChange: fadeOutIntro ? 'opacity' : 'auto' }}
     >
       <motion.div
@@ -116,12 +116,12 @@ export default function IntroAnimation({ showIntro, fadeOutIntro, onComplete }: 
             duration: fadeOutIntro ? (compactMotion ? 0.24 : 0.9) : compactMotion ? 0.55 : 0.8,
             ease: exitEase,
           }}
-          className="relative mx-auto mb-7 h-[156px] w-[156px] sm:mb-8 sm:h-[200px] sm:w-[200px]"
+          className="relative mx-auto mb-6 h-[148px] w-[148px] sm:mb-8 sm:h-[200px] sm:w-[200px]"
         >
           <Image src="/mutedlogo.png" alt="Muted Studio" fill className="object-contain" priority />
         </motion.div>
 
-        <div className="flex min-h-[2.1rem] items-center justify-center text-[1.3rem] font-light uppercase tracking-[0.17em] sm:h-8 sm:text-2xl sm:tracking-[0.2em]">
+        <div className="flex min-h-[2.1rem] max-w-[calc(100vw-2.5rem)] items-center justify-center text-[1.22rem] font-light uppercase tracking-[0.15em] sm:h-8 sm:max-w-none sm:text-2xl sm:tracking-[0.2em]">
           <span className="inline-flex items-center">
             {renderedTypewriterText}
             {!isComplete && <span className="ml-1 animate-pulse">|</span>}
