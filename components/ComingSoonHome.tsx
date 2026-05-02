@@ -21,7 +21,7 @@ export default function ComingSoonHome() {
   const [isSmallScreen, setIsSmallScreen] = useState(false)
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 767px)')
+    const mediaQuery = window.matchMedia('(max-width: 639px)')
     const update = () => setIsSmallScreen(mediaQuery.matches)
     update()
     mediaQuery.addEventListener('change', update)
@@ -145,10 +145,8 @@ export default function ComingSoonHome() {
               loop
               preload="auto"
               poster="/black8.jpg"
-              className={`h-full w-full object-cover object-[50%_44%] transition-opacity duration-700 sm:object-center ${
-                isSmallScreen ? 'scale-100 contrast-100 saturate-100' : 'scale-[1.03] contrast-[1.05] saturate-[1.04]'
-              } ${
-                videoFailed ? 'opacity-0' : videoReady ? 'opacity-[0.97]' : 'opacity-[0.92]'
+              className={`h-full w-full object-cover object-[50%_42%] transition-opacity duration-700 max-sm:scale-100 max-sm:contrast-[1.03] max-sm:saturate-[1.04] sm:object-center sm:scale-[1.03] sm:contrast-[1.05] sm:saturate-[1.04] ${
+                videoFailed ? 'opacity-0' : videoReady ? 'opacity-100 max-sm:opacity-[0.99] sm:opacity-[0.97]' : 'opacity-[0.94] max-sm:opacity-[0.96]'
               }`}
             >
               <source src="/muted.mp4" type="video/mp4" />
@@ -167,10 +165,13 @@ export default function ComingSoonHome() {
           </div>
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-b from-black/38 via-[#0a0a0a]/46 to-[#070707]/64" aria-hidden />
-        <div className="absolute inset-0 bg-black/[0.08]" aria-hidden />
         <div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(155,180,212,0.18),transparent_58%)]"
+          className="absolute inset-0 bg-gradient-to-b from-black/22 via-[#0a0a0a]/30 to-[#070707]/48 sm:from-black/38 sm:via-[#0a0a0a]/46 sm:to-[#070707]/64"
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-black/[0.03] sm:bg-black/[0.08]" aria-hidden />
+        <div
+          className="absolute inset-0 bg-[radial-gradient(ellipse_100%_68%_at_50%_0%,rgba(155,180,212,0.1),transparent_56%)] sm:bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(155,180,212,0.18),transparent_58%)]"
           aria-hidden
         />
         {!isSmallScreen && (
@@ -180,11 +181,14 @@ export default function ComingSoonHome() {
           />
         )}
         <div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_120%_92%_at_50%_50%,transparent_58%,rgba(0,0,0,0.26)_100%)]"
+          className="absolute inset-0 bg-[radial-gradient(ellipse_120%_92%_at_50%_50%,transparent_52%,rgba(0,0,0,0.14)_100%)] sm:bg-[radial-gradient(ellipse_120%_92%_at_50%_50%,transparent_58%,rgba(0,0,0,0.26)_100%)]"
           aria-hidden
         />
         {!isSmallScreen && <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.42)]" aria-hidden />}
-        <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-[#070707]/72 via-[#070707]/32 to-transparent" aria-hidden />
+        <div
+          className="absolute inset-x-0 bottom-0 h-[34%] bg-gradient-to-t from-[#070707]/55 via-[#070707]/22 to-transparent sm:h-[42%] sm:from-[#070707]/72 sm:via-[#070707]/32"
+          aria-hidden
+        />
 
         {!isSmallScreen && (
           <div
@@ -216,23 +220,30 @@ export default function ComingSoonHome() {
       >
         <div
           key={fadeOutIntro ? 'coming-soon-reveal' : 'coming-soon-pending'}
-          className="relative isolate flex flex-1 flex-col items-center justify-center py-8 text-center sm:py-16"
+          className="relative isolate flex flex-1 flex-col items-center justify-center py-6 text-center sm:py-16"
         >
           <div
-            className="pointer-events-none absolute inset-x-[-2%] top-[0%] bottom-[2%] z-0 sm:inset-x-0 sm:top-[4%] sm:bottom-[8%]"
+            className="pointer-events-none absolute inset-x-0 top-[2%] bottom-[8%] z-0 max-sm:block sm:hidden"
             aria-hidden
             style={{
-              background: isSmallScreen
-                ? 'radial-gradient(ellipse 78% 68% at 50% 42%, rgba(7,7,7,0.58) 0%, rgba(7,7,7,0.24) 50%, transparent 74%)'
-                : 'radial-gradient(ellipse 72% 62% at 50% 44%, rgba(7,7,7,0.52) 0%, rgba(7,7,7,0.2) 48%, transparent 72%)',
+              background:
+                'radial-gradient(ellipse 92% 74% at 50% 38%, rgba(7,7,7,0.34) 0%, rgba(7,7,7,0.1) 48%, transparent 72%)',
             }}
           />
-          <div className="relative z-10 flex w-full max-w-[min(100%,36rem)] flex-col items-center px-1 text-center sm:max-w-4xl sm:px-0">
+          <div
+            className="pointer-events-none absolute inset-x-0 top-[4%] bottom-[8%] z-0 hidden sm:block"
+            aria-hidden
+            style={{
+              background:
+                'radial-gradient(ellipse 72% 62% at 50% 44%, rgba(7,7,7,0.52) 0%, rgba(7,7,7,0.2) 48%, transparent 72%)',
+            }}
+          />
+          <div className="relative z-10 flex w-full max-w-[min(100%,20.5rem)] flex-col items-center px-3 text-center sm:max-w-4xl sm:px-0">
           <motion.div
             initial={compactMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={transitionBase}
-            className="mb-5 h-px w-16 bg-gradient-to-r from-transparent via-accent/70 to-transparent sm:mb-9 sm:w-20"
+            className="mb-3 h-px w-12 bg-gradient-to-r from-transparent via-accent/60 to-transparent sm:mb-9 sm:h-px sm:w-20 sm:via-accent/70"
           />
 
           <motion.h1
@@ -248,7 +259,7 @@ export default function ComingSoonHome() {
               ease: easePremium,
               delay: compactMotion ? 0 : 0.22,
             }}
-            className="max-w-[22ch] font-light tracking-[0.095em] text-[clamp(1.85rem,8.2vw,4.9rem)] leading-[1.1] text-white sm:max-w-none sm:tracking-[0.14em]"
+            className="max-w-[20ch] font-light tracking-[0.14em] text-[clamp(1.66rem,7.1vw,2.12rem)] leading-[1.12] text-white sm:max-w-none sm:text-[clamp(1.85rem,8.2vw,4.9rem)] sm:leading-[1.1] sm:tracking-[0.14em]"
           >
             <span className="inline-flex flex-wrap items-center justify-center gap-x-[0.03em]">
               <span>MUT</span>
@@ -266,9 +277,9 @@ export default function ComingSoonHome() {
             initial={compactMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 2 }}
-            className="mx-auto mt-7 max-w-[min(100%,38ch)] sm:mt-12 sm:max-w-2xl"
+            className="mx-auto mt-4 max-w-[26ch] sm:mt-12 sm:max-w-2xl"
           >
-            <p className="text-[clamp(1.02rem,4.4vw,1.18rem)] font-light leading-[1.78] tracking-[0.032em] text-white/92 [text-shadow:0_2px_14px_rgba(0,0,0,0.52)] sm:tracking-[0.05em]">
+            <p className="text-[0.84375rem] font-light leading-[1.58] tracking-[0.04em] text-white/86 [text-shadow:0_1px_10px_rgba(0,0,0,0.42)] sm:text-[clamp(1.02rem,4.4vw,1.18rem)] sm:leading-[1.78] sm:tracking-[0.05em] sm:text-white/92 sm:[text-shadow:0_2px_14px_rgba(0,0,0,0.52)]">
               A design-build firm that creates refined, thoughtfully curated environments and landscapes.
             </p>
           </motion.div>
@@ -277,7 +288,7 @@ export default function ComingSoonHome() {
             initial={compactMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitionBase, delay: stagger * 3 }}
-            className={`mt-6 max-w-[min(100%,33ch)] text-[clamp(0.97rem,4.1vw,1.28rem)] font-semibold uppercase leading-[1.68] tracking-[0.14em] text-white sm:mt-10 sm:max-w-3xl sm:tracking-[0.28em] ${
+            className={`mt-4 max-w-[24ch] text-[0.65625rem] font-medium uppercase leading-[1.52] tracking-[0.22em] text-white/90 sm:mt-10 sm:max-w-3xl sm:text-[clamp(0.97rem,4.1vw,1.28rem)] sm:font-semibold sm:leading-[1.68] sm:tracking-[0.28em] ${
               reduceMotion
                 ? '[text-shadow:0_2px_12px_rgba(0,0,0,0.55)]'
                 : compactMotion
@@ -289,30 +300,30 @@ export default function ComingSoonHome() {
           </motion.p>
           </div>
 
-        <div className="relative z-10 mt-8 w-full max-sm:max-w-[min(100%,22rem)] pb-[max(2.25rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
-          <div className="mx-auto min-h-[200px] w-full max-w-xl text-center sm:min-h-[220px] lg:min-h-[236px]">
+        <div className="relative z-10 mt-7 w-full pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
+          <div className="mx-auto w-full max-w-xl text-center sm:min-h-[220px] lg:min-h-[236px]">
             <div
-              className="mx-auto h-px w-16 bg-gradient-to-r from-transparent via-accent/65 to-transparent sm:w-24"
+              className="mx-auto h-px w-12 bg-gradient-to-r from-transparent via-accent/50 to-transparent opacity-80 sm:mt-0 sm:h-px sm:w-24 sm:via-accent/65 sm:opacity-100"
               aria-hidden
             />
-            <footer className="relative mt-3 sm:mt-4">
-              <div className="mx-auto w-full max-w-lg transform-gpu rounded-2xl border border-white/[0.07] bg-[rgba(7,7,7,0.42)] px-3 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-md sm:bg-white/[0.018] sm:px-5 sm:py-3 sm:backdrop-blur-xl">
+            <footer className="relative mt-2.5 sm:mt-4">
+              <div className="mx-auto w-full max-w-lg sm:transform-gpu sm:rounded-2xl sm:border sm:border-white/[0.07] sm:bg-white/[0.018] sm:px-5 sm:py-3 sm:shadow-[0_8px_32px_rgba(0,0,0,0.1)] sm:backdrop-blur-xl">
               <button
                 type="button"
                 onClick={() => setContactOpen((prev) => !prev)}
-                className="coming-soon-contact-trigger mx-auto inline-flex min-h-[48px] w-full max-w-full touch-manipulation items-center justify-center gap-2.5 px-3 text-[0.88rem] font-normal uppercase tracking-[0.16em] text-white/88 outline-none ring-0 transition-[color,opacity] duration-300 ease-out [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none active:opacity-90 sm:min-h-[46px] sm:w-auto sm:max-w-none sm:px-2 sm:text-[1.05rem] sm:tracking-[0.24em]"
+                className="coming-soon-contact-trigger mx-auto inline-flex min-h-[44px] max-sm:w-full max-sm:max-w-[16.5rem] touch-manipulation items-center justify-center gap-[0.35em] border-0 bg-transparent px-5 py-3 text-[0.625rem] font-normal uppercase tracking-[0.26em] text-white/68 outline-none ring-0 transition-[color,opacity] duration-300 ease-out [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none max-sm:hover:text-white/88 max-sm:active:opacity-80 sm:min-h-[46px] sm:w-auto sm:max-w-none sm:px-2 sm:py-0 sm:text-[1.05rem] sm:tracking-[0.24em] sm:text-white/88 sm:hover:text-inherit sm:active:opacity-90"
                 aria-expanded={contactOpen}
                 aria-controls="coming-soon-contact-panel"
               >
-                <span>Contact Us</span>
+                <span className="max-sm:border-b max-sm:border-white/[0.12] max-sm:pb-1 sm:border-0 sm:pb-0">Contact Us</span>
                 <motion.span
                   aria-hidden
-                  animate={{ rotate: contactOpen ? 45 : 0, opacity: contactOpen ? 0.92 : 1 }}
+                  animate={{ rotate: contactOpen ? 45 : 0, opacity: contactOpen ? 0.85 : 0.65 }}
                   transition={{
                     duration: reduceMotion ? 0.01 : 0.45,
                     ease: easePremium,
                   }}
-                  className="inline-block text-[0.98rem] leading-none text-accent/85 sm:text-[1.16rem]"
+                  className="inline-block translate-y-[0.06em] text-[0.7rem] font-extralight leading-none text-accent/65 sm:translate-y-0 sm:text-[1.16rem] sm:font-light sm:text-accent/85 sm:opacity-100"
                 >
                   +
                 </motion.span>
@@ -323,26 +334,26 @@ export default function ComingSoonHome() {
                 initial={false}
                 animate={{
                   opacity: contactOpen ? 1 : 0,
-                  y: contactOpen ? 0 : -8,
-                  scale: contactOpen ? 1 : 0.985,
+                  y: contactOpen ? 0 : isSmallScreen ? -3 : -8,
+                  scale: contactOpen ? 1 : isSmallScreen ? 1 : 0.985,
                 }}
                 transition={{
-                  duration: reduceMotion ? 0.01 : 0.42,
+                  duration: reduceMotion ? 0.01 : isSmallScreen ? 0.5 : 0.42,
                   ease: easePremium,
                 }}
                 style={{ transformOrigin: 'top center' }}
-                className={`absolute inset-x-0 top-[calc(100%+0.72rem)] mx-auto w-full max-w-lg overflow-hidden sm:top-[calc(100%+0.9rem)] ${
+                className={`absolute inset-x-0 top-[calc(100%+0.35rem)] mx-auto w-full max-w-lg overflow-visible sm:overflow-hidden sm:top-[calc(100%+0.9rem)] ${
                   contactOpen ? 'pointer-events-auto' : 'pointer-events-none'
                 }`}
               >
-                <div className="mx-4 transform-gpu rounded-xl border border-white/[0.06] bg-[rgba(7,7,7,0.48)] px-4 py-3 shadow-[0_6px_24px_rgba(0,0,0,0.08)] backdrop-blur-md sm:bg-white/[0.025] sm:backdrop-blur-lg sm:mx-0 sm:px-5 sm:py-4">
+                <div className="mx-auto max-w-lg max-sm:border-t max-sm:border-white/[0.08] max-sm:pt-4 sm:mx-4 sm:rounded-xl sm:border sm:border-white/[0.06] sm:bg-white/[0.025] sm:px-5 sm:py-4 sm:shadow-[0_6px_24px_rgba(0,0,0,0.08)] sm:backdrop-blur-lg">
                   <a
                     href="mailto:hello@mutedstudio.ca"
-                    className="coming-soon-contact-mail inline-block py-1 text-[1rem] font-normal tracking-[0.01em] text-white underline decoration-white/35 underline-offset-[0.32em] outline-none transition-colors [-webkit-tap-highlight-color:transparent] hover:text-accent hover:decoration-accent/50 focus:outline-none focus-visible:outline-none sm:text-[1.08rem]"
+                    className="coming-soon-contact-mail inline-block py-0.5 text-[0.8125rem] font-light tracking-[0.06em] text-white/92 underline decoration-white/25 outline-none transition-[color,text-decoration-color] duration-300 [-webkit-tap-highlight-color:transparent] underline-offset-[0.32em] max-sm:decoration-white/20 hover:text-accent hover:decoration-accent/40 focus:outline-none focus-visible:outline-none sm:py-1 sm:text-[1.08rem] sm:font-normal sm:tracking-[0.01em] sm:text-white sm:decoration-white/35"
                   >
                     hello@mutedstudio.ca
                   </a>
-                  <p className="mx-auto mt-2 max-w-[40ch] text-pretty text-[0.84rem] font-light leading-relaxed tracking-[0.05em] text-white/68 sm:mt-3 sm:max-w-[42ch] sm:text-[0.9rem] sm:tracking-[0.06em]">
+                  <p className="mx-auto mt-2.5 max-w-[32ch] text-pretty text-[0.65625rem] font-light leading-[1.6] tracking-[0.055em] text-white/50 sm:mt-3 sm:max-w-[42ch] sm:text-[0.9rem] sm:tracking-[0.06em] sm:text-white/68">
                     We are currently accepting select new client inquiries and project invitations.
                   </p>
                 </div>
