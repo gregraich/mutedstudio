@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useIntro } from '@/lib/IntroContext'
 import IntroAnimation, { INTRO_EXIT_HANDOFF_MS } from '@/components/IntroAnimation'
+import { ComingSoonHeroVideo } from '@/components/ComingSoonHeroVideo'
 
 const easePremium: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
@@ -12,11 +13,8 @@ const noiseDataUri = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 export default function ComingSoonHome() {
   const { setShowNav } = useIntro()
   const reduceMotion = useReducedMotion()
-  const videoRef = useRef<HTMLVideoElement | null>(null)
   const [showIntro, setShowIntro] = useState(true)
   const [fadeOutIntro, setFadeOutIntro] = useState(false)
-  const [videoReady, setVideoReady] = useState(false)
-  const [videoFailed, setVideoFailed] = useState(false)
   const [contactOpen, setContactOpen] = useState(false)
   const [isSmallScreen, setIsSmallScreen] = useState(false)
 
@@ -30,84 +28,6 @@ export default function ComingSoonHome() {
 
   useEffect(() => {
     setShowNav(false)
-  }, [setShowNav])
-
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
-    // Reinforce iOS/Safari inline-autoplay requirements on the actual DOM node.
-    video.muted = true
-    video.defaultMuted = true
-    video.playsInline = true
-    video.setAttribute('muted', '')
-    video.setAttribute('autoplay', '')
-    video.setAttribute('playsinline', '')
-    video.setAttribute('webkit-playsinline', 'true')
-    video.preload = 'auto'
-    video.load()
-
-    const attemptPlay = async () => {
-      try {
-        const playPromise = video.play()
-        if (playPromise && typeof playPromise.then === 'function') {
-          await playPromise
-        }
-      } catch {
-        // iOS can reject autoplay promises in Low Power mode/settings.
-        // Do not trigger fallback unless media loading actually fails.
-      }
-    }
-
-    const onCanPlay = () => {
-      setVideoReady(true)
-      setVideoFailed(false)
-      void attemptPlay()
-    }
-
-    const onLoadedData = () => {
-      setVideoReady(true)
-      setVideoFailed(false)
-    }
-
-    const onPlaying = () => {
-      setVideoReady(true)
-      setVideoFailed(false)
-    }
-
-    const onLoadedMetadata = () => {
-      setVideoFailed(false)
-      void attemptPlay()
-    }
-
-    const onError = () => {
-      // Only fail over on definitive source failure.
-      if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
-        setVideoFailed(true)
-        return
-      }
-
-      // Safari/iOS can emit transient media errors while still recovering.
-      // Keep the video path alive and retry playback.
-      setVideoFailed(false)
-      void attemptPlay()
-    }
-
-    video.addEventListener('canplay', onCanPlay)
-    video.addEventListener('loadedmetadata', onLoadedMetadata)
-    video.addEventListener('loadeddata', onLoadedData)
-    video.addEventListener('playing', onPlaying)
-    video.addEventListener('error', onError)
-
-    void attemptPlay()
-
-    return () => {
-      video.removeEventListener('canplay', onCanPlay)
-      video.removeEventListener('loadedmetadata', onLoadedMetadata)
-      video.removeEventListener('loadeddata', onLoadedData)
-      video.removeEventListener('playing', onPlaying)
-      video.removeEventListener('error', onError)
-    }
   }, [setShowNav])
 
   const handleIntroComplete = () => {
@@ -131,39 +51,8 @@ export default function ComingSoonHome() {
   return (
     <main className="relative flex min-h-[100svh] flex-col bg-[#070707] text-foreground overflow-hidden sm:min-h-[100dvh]">
       <IntroAnimation showIntro={showIntro} fadeOutIntro={fadeOutIntro} onComplete={handleIntroComplete} />
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute inset-0 overflow-hidden">
-          <div
-            className={`absolute inset-0 ${compactMotion ? '' : 'animate-coming-soon-drift'}`}
-            style={{ transformOrigin: '50% 50%' }}
-          >
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              playsInline
-              loop
-              preload="auto"
-              poster="/black8.jpg"
-              className={`h-full w-full object-cover object-[52%_46%] transition-opacity duration-700 max-sm:scale-[1.07] max-sm:brightness-[0.97] max-sm:contrast-[1.02] max-sm:saturate-[1.03] sm:object-center sm:scale-[1.03] sm:brightness-100 sm:contrast-[1.05] sm:saturate-[1.04] ${
-                videoFailed ? 'opacity-0' : videoReady ? 'opacity-100 max-sm:opacity-[0.995] sm:opacity-[0.97]' : 'opacity-[0.94] max-sm:opacity-[0.97]'
-              }`}
-            >
-              <source src="/muted.mp4" type="video/mp4" />
-            </video>
-            {videoFailed && (
-              <div className="absolute inset-0">
-                <img
-                  src="/black8.jpg"
-                  alt=""
-                  className="h-full w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                />
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="pointer-events-none absolute inset-0 z-0 isolate">
+        <ComingSoonHeroVideo />
 
         <div
           className="absolute inset-0 bg-gradient-to-b from-black/20 via-[#0a0a0a]/34 to-[#070707]/52 sm:from-black/38 sm:via-[#0a0a0a]/46 sm:to-[#070707]/64"
