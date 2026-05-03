@@ -28,11 +28,17 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo() {
       setFailed(false)
     }
 
-    const play = () => {
+    const attemptPlay = async () => {
       if (cancelled) return
-      void video.play().catch(() => {
-        /* autoplay policy / Low Power */
-      })
+      try {
+        const playPromise = video.play()
+        if (playPromise && typeof playPromise.then === 'function') {
+          await playPromise
+        }
+      } catch {
+        // iOS can reject autoplay promises in Low Power mode/settings.
+        // Do not trigger fallback unless media loading actually fails.
+      }
     }
 
     video.muted = true
@@ -44,18 +50,26 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo() {
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', 'true')
     video.preload = 'auto'
-    // Intentionally no video.load() — it clears buffered data and often reads as hitching.
+    // `load()` resets the element and starts fetching after attribute fixups — required for
+    // reliable first-frame / autoplay on iOS Safari and Chrome Android after React hydration.
+    video.load()
 
     const onLoadedMetadata = () => {
       if (cancelled) return
       setFailed(false)
-      play()
+      void attemptPlay()
+    }
+
+    const onLoadedData = () => {
+      if (cancelled) return
+      raiseReady()
+      setFailed(false)
     }
 
     const onCanPlay = () => {
       if (cancelled) return
       raiseReady()
-      play()
+      void attemptPlay()
     }
 
     const onPlaying = () => {
@@ -65,24 +79,41 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo() {
 
     const onError = () => {
       if (cancelled) return
-      if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+      const err = video.error
+      if (
+        err?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
+        err?.code === MediaError.MEDIA_ERR_DECODE
+      ) {
+        setFailed(true)
+        return
+      }
+      if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE && err) {
         setFailed(true)
         return
       }
       setFailed(false)
-      play()
+      void attemptPlay()
     }
 
     video.addEventListener('loadedmetadata', onLoadedMetadata)
+    video.addEventListener('loadeddata', onLoadedData)
     video.addEventListener('canplay', onCanPlay)
     video.addEventListener('playing', onPlaying)
     video.addEventListener('error', onError)
 
-    play()
+    void attemptPlay()
+    requestAnimationFrame(() => {
+      if (cancelled) return
+      requestAnimationFrame(() => {
+        if (cancelled) return
+        void attemptPlay()
+      })
+    })
 
     return () => {
       cancelled = true
       video.removeEventListener('loadedmetadata', onLoadedMetadata)
+      video.removeEventListener('loadeddata', onLoadedData)
       video.removeEventListener('canplay', onCanPlay)
       video.removeEventListener('playing', onPlaying)
       video.removeEventListener('error', onError)
