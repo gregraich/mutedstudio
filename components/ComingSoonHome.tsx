@@ -102,7 +102,7 @@ export default function ComingSoonHome() {
       </div>
 
       <motion.div
-        className="pointer-events-none relative z-10 flex min-h-[100svh] flex-1 flex-col px-5 pt-[max(0.85rem,env(safe-area-inset-top))] sm:min-h-[100dvh] sm:px-10 sm:pt-0 lg:px-16"
+        className="relative z-10 flex min-h-[100svh] flex-1 flex-col px-5 pt-[max(0.85rem,env(safe-area-inset-top))] sm:min-h-[100dvh] sm:px-10 sm:pt-0 lg:px-16"
         initial={false}
         animate={{
           opacity: fadeOutIntro || !showIntro ? 1 : 0,
@@ -115,7 +115,7 @@ export default function ComingSoonHome() {
       >
         <div
           key={fadeOutIntro ? 'coming-soon-reveal' : 'coming-soon-pending'}
-          className="relative isolate flex flex-1 flex-col items-center justify-center py-7 text-center max-sm:-translate-y-[0.5vh] sm:translate-y-0 sm:py-16 [&_*]:pointer-events-none"
+          className="pointer-events-none relative isolate flex flex-1 flex-col items-center justify-center py-7 text-center max-sm:-translate-y-[0.5vh] sm:translate-y-0 sm:py-16 [&_*]:pointer-events-none"
         >
           <div
             className="pointer-events-none absolute inset-x-0 top-[2%] bottom-[10%] z-0 max-sm:block sm:hidden"
@@ -194,8 +194,9 @@ export default function ComingSoonHome() {
             Our new digital experience is coming soon.
           </motion.p>
           </div>
+        </div>
 
-        <div className="pointer-events-auto relative z-10 mt-9 w-full pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
+        <div className="relative z-10 mt-9 w-full pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
           <div className="mx-auto w-full max-w-xl text-center sm:min-h-[220px] lg:min-h-[236px]">
             <div
               className="mx-auto h-px w-12 bg-gradient-to-r from-transparent via-accent/50 to-transparent opacity-80 sm:mt-0 sm:h-px sm:w-24 sm:via-accent/65 sm:opacity-100"
@@ -256,7 +257,6 @@ export default function ComingSoonHome() {
               </div>
             </footer>
           </div>
-        </div>
         </div>
       </motion.div>
     </main>
