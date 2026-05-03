@@ -21,6 +21,7 @@ function applyInlineAutoplayAttrs(video: HTMLVideoElement) {
   video.defaultMuted = true
   video.playsInline = true
   video.setAttribute('muted', '')
+  video.setAttribute('autoplay', '')
   video.setAttribute('playsinline', '')
   video.setAttribute('webkit-playsinline', 'true')
   video.setAttribute('x5-playsinline', 'true')
@@ -107,11 +108,21 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       if (!document.hidden) attemptPlay()
     }
 
+    let stallTimer: number | undefined
+    const onStallOrWait = () => {
+      if (stallTimer) window.clearTimeout(stallTimer)
+      stallTimer = window.setTimeout(() => {
+        if (!cancelled && video.paused) attemptPlay()
+      }, 250)
+    }
+
     video.addEventListener('loadedmetadata', onLoadedMetadata)
     video.addEventListener('loadeddata', onLoadedData)
     video.addEventListener('canplay', onCanPlay)
     video.addEventListener('playing', onPlaying)
     video.addEventListener('error', onError)
+    video.addEventListener('stalled', onStallOrWait)
+    video.addEventListener('waiting', onStallOrWait)
 
     attemptPlay()
     queueMicrotask(attemptPlay)
@@ -121,6 +132,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
 
     return () => {
       cancelled = true
+      if (stallTimer) window.clearTimeout(stallTimer)
       document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('pageshow', onPageShow)
       video.removeEventListener('loadedmetadata', onLoadedMetadata)
@@ -128,6 +140,8 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       video.removeEventListener('canplay', onCanPlay)
       video.removeEventListener('playing', onPlaying)
       video.removeEventListener('error', onError)
+      video.removeEventListener('stalled', onStallOrWait)
+      video.removeEventListener('waiting', onStallOrWait)
     }
   }, [])
 
