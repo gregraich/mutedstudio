@@ -422,10 +422,3 @@ a.coming-soon-contact-mail:focus-visible {
   border-right: 2px solid white;
   animation: typewriter 2s steps(17) forwards;
 }
-
-/* Muted inline background: hide WebKit’s start-play overlay (play() still runs from JS / gestures). */
-video.coming-soon-hero-video::-webkit-media-controls,
-video.coming-soon-hero-video::-webkit-media-controls-enclosure,
-video.coming-soon-hero-video::-webkit-media-controls-start-playback-button {
-  display: none !important;
-}

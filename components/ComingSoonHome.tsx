@@ -55,44 +55,46 @@ export default function ComingSoonHome() {
         <ComingSoonHeroVideo playGate={!showIntro} />
 
         <div
-          className="absolute inset-0 bg-gradient-to-b from-black/20 via-[#0a0a0a]/34 to-[#070707]/52 sm:from-black/38 sm:via-[#0a0a0a]/46 sm:to-[#070707]/64"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-[#0a0a0a]/34 to-[#070707]/52 sm:from-black/38 sm:via-[#0a0a0a]/46 sm:to-[#070707]/64"
           aria-hidden
         />
-        <div className="absolute inset-0 bg-black/[0.035] sm:bg-black/[0.08]" aria-hidden />
+        <div className="pointer-events-none absolute inset-0 bg-black/[0.035] sm:bg-black/[0.08]" aria-hidden />
         <div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_100%_68%_at_50%_0%,rgba(155,180,212,0.1),transparent_56%)] sm:bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(155,180,212,0.18),transparent_58%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_100%_68%_at_50%_0%,rgba(155,180,212,0.1),transparent_56%)] sm:bg-[radial-gradient(ellipse_100%_70%_at_50%_0%,rgba(155,180,212,0.18),transparent_58%)]"
           aria-hidden
         />
         <div
-          className="absolute inset-0 max-sm:block sm:hidden bg-[radial-gradient(ellipse_88%_56%_at_50%_44%,rgba(5,5,5,0.22)_0%,transparent_62%)]"
+          className="pointer-events-none absolute inset-0 max-sm:block sm:hidden bg-[radial-gradient(ellipse_88%_56%_at_50%_44%,rgba(5,5,5,0.22)_0%,transparent_62%)]"
           aria-hidden
         />
         {!isSmallScreen && (
           <div
-            className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_100%,rgba(255,255,255,0.04),transparent_55%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_100%,rgba(255,255,255,0.04),transparent_55%)]"
             aria-hidden
           />
         )}
         <div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_120%_92%_at_50%_50%,transparent_52%,rgba(0,0,0,0.14)_100%)] sm:bg-[radial-gradient(ellipse_120%_92%_at_50%_50%,transparent_58%,rgba(0,0,0,0.26)_100%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_120%_92%_at_50%_50%,transparent_52%,rgba(0,0,0,0.14)_100%)] sm:bg-[radial-gradient(ellipse_120%_92%_at_50%_50%,transparent_58%,rgba(0,0,0,0.26)_100%)]"
           aria-hidden
         />
-        {!isSmallScreen && <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.42)]" aria-hidden />}
+        {!isSmallScreen && (
+          <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.42)]" aria-hidden />
+        )}
         <div
-          className="absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-t from-[#070707]/48 via-[#070707]/18 to-transparent sm:h-[42%] sm:from-[#070707]/72 sm:via-[#070707]/32"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-t from-[#070707]/48 via-[#070707]/18 to-transparent sm:h-[42%] sm:from-[#070707]/72 sm:via-[#070707]/32"
           aria-hidden
         />
 
         {!isSmallScreen && (
           <div
-            className="absolute inset-0 opacity-[0.025] mix-blend-soft-light"
+            className="pointer-events-none absolute inset-0 opacity-[0.025] mix-blend-soft-light"
             style={{ backgroundImage: noiseDataUri }}
             aria-hidden
           />
         )}
         {!compactMotion && (
           <div
-            className="absolute inset-0 opacity-[0.014] mix-overlay animate-coming-soon-grain"
+            className="pointer-events-none absolute inset-0 opacity-[0.014] mix-overlay animate-coming-soon-grain"
             style={{ backgroundImage: noiseDataUri, backgroundSize: '180px 180px' }}
             aria-hidden
           />
@@ -100,7 +102,7 @@ export default function ComingSoonHome() {
       </div>
 
       <motion.div
-        className="relative z-10 flex min-h-[100svh] flex-1 flex-col px-5 pt-[max(0.85rem,env(safe-area-inset-top))] sm:min-h-[100dvh] sm:px-10 sm:pt-0 lg:px-16"
+        className="pointer-events-none relative z-10 flex min-h-[100svh] flex-1 flex-col px-5 pt-[max(0.85rem,env(safe-area-inset-top))] sm:min-h-[100dvh] sm:px-10 sm:pt-0 lg:px-16"
         initial={false}
         animate={{
           opacity: fadeOutIntro || !showIntro ? 1 : 0,
@@ -113,7 +115,7 @@ export default function ComingSoonHome() {
       >
         <div
           key={fadeOutIntro ? 'coming-soon-reveal' : 'coming-soon-pending'}
-          className="relative isolate flex flex-1 flex-col items-center justify-center py-7 text-center max-sm:-translate-y-[0.5vh] sm:translate-y-0 sm:py-16"
+          className="relative isolate flex flex-1 flex-col items-center justify-center py-7 text-center max-sm:-translate-y-[0.5vh] sm:translate-y-0 sm:py-16 [&_*]:pointer-events-none"
         >
           <div
             className="pointer-events-none absolute inset-x-0 top-[2%] bottom-[10%] z-0 max-sm:block sm:hidden"
@@ -193,7 +195,7 @@ export default function ComingSoonHome() {
           </motion.p>
           </div>
 
-        <div className="relative z-10 mt-9 w-full pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
+        <div className="pointer-events-auto relative z-10 mt-9 w-full pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
           <div className="mx-auto w-full max-w-xl text-center sm:min-h-[220px] lg:min-h-[236px]">
             <div
               className="mx-auto h-px w-12 bg-gradient-to-r from-transparent via-accent/50 to-transparent opacity-80 sm:mt-0 sm:h-px sm:w-24 sm:via-accent/65 sm:opacity-100"

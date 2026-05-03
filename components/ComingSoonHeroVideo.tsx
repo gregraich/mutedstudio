@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 /**
  * Memoized background video so parent re-renders (intro, contact, framer) do not
@@ -32,7 +32,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   const [failed, setFailed] = useState(false)
   const readyOnce = useRef(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const video = ref.current
     if (!video) return
 
@@ -99,11 +99,6 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       attemptPlay()
     }
 
-    /** WebKit only unlocks muted autoplay if play() runs in the same turn as a user input. */
-    const onUserUnlock = () => {
-      attemptPlay()
-    }
-
     const onPageShow = (ev: PageTransitionEvent) => {
       if (ev.persisted) attemptPlay()
     }
@@ -121,15 +116,11 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     attemptPlay()
     queueMicrotask(attemptPlay)
 
-    window.addEventListener('pointerdown', onUserUnlock, { capture: true })
-    window.addEventListener('touchend', onUserUnlock, { capture: true, passive: true })
     document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('pageshow', onPageShow)
 
     return () => {
       cancelled = true
-      window.removeEventListener('pointerdown', onUserUnlock, { capture: true })
-      window.removeEventListener('touchend', onUserUnlock, { capture: true } as AddEventListenerOptions)
       document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('pageshow', onPageShow)
       video.removeEventListener('loadedmetadata', onLoadedMetadata)
@@ -151,8 +142,15 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     })
   }, [playGate])
 
+  const onVideoPointerDown = () => {
+    const video = ref.current
+    if (!video) return
+    applyInlineAutoplayAttrs(video)
+    void video.play().catch(() => {})
+  }
+
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="pointer-events-auto absolute inset-0 overflow-hidden">
       <div className="absolute inset-0" style={{ transformOrigin: '50% 50%' }}>
         <video
           ref={ref}
@@ -163,7 +161,8 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
           loop
           preload="auto"
           poster="/black8.jpg"
-          className={`coming-soon-hero-video h-full w-full object-cover object-[52%_46%] sm:object-center ${
+          onPointerDownCapture={onVideoPointerDown}
+          className={`h-full w-full object-cover object-[52%_46%] sm:object-center ${
             failed
               ? 'opacity-0'
               : ready
