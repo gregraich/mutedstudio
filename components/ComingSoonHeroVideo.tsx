@@ -6,9 +6,9 @@ import { memo, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStor
  * Memoized background video so parent re-renders (intro, contact, framer) do not
  * reconcile the <video> DOM unnecessarily — that can contribute to Safari/iOS stutter.
  *
- * Uses a single `src` chosen on the client. `<source media>` is unreliable on iOS
- * Safari; `matchMedia` + one URL avoids that. Narrow viewports try `muted-mobile.mp4`
- * first; if that request fails, we fall back to `muted.mp4` without device sniffing.
+ * Narrow viewports use `muted-mobile.mp4` when available; on load failure we fall back
+ * to `muted.mp4` (same URL check as `onError` — do not rely on `currentSrc` containing
+ * the filename; it is often empty when the resource errors).
  */
 const VIDEO_SRC_DESKTOP = '/muted.mp4'
 const VIDEO_SRC_MOBILE = '/muted-mobile.mp4'
@@ -48,7 +48,6 @@ function applyInlineAutoplayAttrs(video: HTMLVideoElement) {
 export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate }: ComingSoonHeroVideoProps) {
   const ref = useRef<HTMLVideoElement | null>(null)
   const maxSm = useSyncExternalStore(subscribeMaxSm, getMaxSmSnapshot, getMaxSmServerSnapshot)
-  /** After a real failure loading the mobile asset, use the master file on small screens too. */
   const [mobileAssetBypass, setMobileAssetBypass] = useState(false)
 
   const resolvedSrc =
@@ -58,12 +57,15 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   const [failed, setFailed] = useState(false)
   const readyOnce = useRef(false)
 
+  /** Reset “ready” after paint when the URL changes — avoids setState during layout on the video. */
+  useEffect(() => {
+    readyOnce.current = false
+    setReady(false)
+  }, [resolvedSrc])
+
   useLayoutEffect(() => {
     const video = ref.current
     if (!video) return
-
-    readyOnce.current = false
-    setReady(false)
 
     let cancelled = false
 
@@ -78,14 +80,12 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       if (cancelled) return
       applyInlineAutoplayAttrs(video)
       void video.play().catch(() => {
-        /* autoplay policy / Low Power — first real tap still unlocks via pointer listener */
+        /* autoplay policy / Low Power */
       })
     }
 
     applyInlineAutoplayAttrs(video)
     video.preload = 'auto'
-    // Do NOT call video.load() here: on iOS/WebKit it commonly forces the next play()
-    // onto the "user gesture required" path and leaves the inline play overlay up.
 
     const onLoadedMetadata = () => {
       if (cancelled) return
@@ -113,9 +113,9 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     const onError = () => {
       if (cancelled) return
       const err = video.error
-      const url = video.currentSrc || video.src || ''
+      const triedMobile = maxSm && !mobileAssetBypass && resolvedSrc === VIDEO_SRC_MOBILE
 
-      if (maxSm && !mobileAssetBypass && url.includes('muted-mobile')) {
+      if (triedMobile) {
         setMobileAssetBypass(true)
         setFailed(false)
         return
@@ -176,7 +176,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       video.removeEventListener('stalled', onStallOrWait)
       video.removeEventListener('waiting', onStallOrWait)
     }
-  }, [resolvedSrc])
+  }, [resolvedSrc, maxSm, mobileAssetBypass])
 
   useEffect(() => {
     if (!maxSm) setMobileAssetBypass(false)
@@ -193,6 +193,22 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     })
   }, [playGate])
 
+  /** One unlock attempt on first touch (iOS Low Power / strict autoplay). */
+  useEffect(() => {
+    const unlock = () => {
+      const v = ref.current
+      if (!v) return
+      applyInlineAutoplayAttrs(v)
+      void v.play().catch(() => {})
+    }
+    window.addEventListener('touchstart', unlock, { passive: true, capture: true, once: true })
+    window.addEventListener('pointerdown', unlock, { capture: true, once: true })
+    return () => {
+      window.removeEventListener('touchstart', unlock, { capture: true } as AddEventListenerOptions)
+      window.removeEventListener('pointerdown', unlock, { capture: true } as AddEventListenerOptions)
+    }
+  }, [])
+
   const onVideoPointerDown = () => {
     const video = ref.current
     if (!video) return
@@ -205,17 +221,16 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       <div className="absolute inset-0" style={{ transformOrigin: '50% 50%' }}>
         <video
           ref={ref}
-          key={resolvedSrc}
           src={resolvedSrc}
-          autoPlay
           muted
           playsInline
+          autoPlay
           loop
           preload="auto"
           poster="/black8.jpg"
           suppressHydrationWarning
           onPointerDownCapture={onVideoPointerDown}
-          className={`h-full w-full object-cover object-[52%_46%] sm:object-center ${
+          className={`h-full min-h-0 w-full min-w-0 object-cover object-[52%_46%] sm:object-center ${
             failed
               ? 'opacity-0'
               : ready
