@@ -6,10 +6,12 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react'
  * Memoized background video so parent re-renders (intro, contact, framer) do not
  * reconcile the <video> DOM unnecessarily — that can contribute to Safari/iOS stutter.
  *
- * For smoother phones, add `public/muted-mobile.mp4` (720p ~2.5–3 Mbps, +faststart, -an)
- * and wire a second `<source media="(max-width: 639px)" />`.
+ * Mobile (max-width: 639px) prefers `public/muted-mobile.mp4`; larger viewports use
+ * `public/muted.mp4`. If the mobile file is missing, the browser falls through to the
+ * master file (larger download on phones until you add the mobile asset).
  */
-const VIDEO_SRC = '/muted.mp4'
+const VIDEO_SRC_DESKTOP = '/muted.mp4'
+const VIDEO_SRC_MOBILE = '/muted-mobile.mp4'
 
 type ComingSoonHeroVideoProps = {
   /** After the intro unmounts, call `play()` again — without `load()`, so we do not reset iOS media-user-gesture state. */
@@ -85,14 +87,13 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     const onError = () => {
       if (cancelled) return
       const err = video.error
-      if (
-        err?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
-        err?.code === MediaError.MEDIA_ERR_DECODE
-      ) {
+      // Only treat definitive codec/source failures as fatal. Network/abort/no-source
+      // can appear transiently while the element moves between <source> candidates.
+      if (err?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
         setFailed(true)
         return
       }
-      if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE && err) {
+      if (err?.code === MediaError.MEDIA_ERR_DECODE) {
         setFailed(true)
         return
       }
@@ -168,7 +169,6 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       <div className="absolute inset-0" style={{ transformOrigin: '50% 50%' }}>
         <video
           ref={ref}
-          src={VIDEO_SRC}
           autoPlay
           muted
           playsInline
@@ -183,7 +183,10 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
                 ? 'opacity-100 max-sm:opacity-[0.995] sm:opacity-[0.97]'
                 : 'opacity-[0.94] max-sm:opacity-[0.97]'
           } max-sm:transition-none sm:transition-opacity sm:duration-200 sm:ease-out`}
-        />
+        >
+          <source src={VIDEO_SRC_MOBILE} type="video/mp4" media="(max-width: 639px)" />
+          <source src={VIDEO_SRC_DESKTOP} type="video/mp4" />
+        </video>
         {failed && (
           <div className="absolute inset-0">
             <img
