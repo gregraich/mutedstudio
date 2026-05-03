@@ -7,13 +7,23 @@ import { memo, useEffect, useRef, useState } from 'react'
  * reconcile the <video> DOM unnecessarily — that can contribute to Safari/iOS stutter.
  *
  * For smoother phones, add `public/muted-mobile.mp4` (720p ~2.5–3 Mbps, +faststart, -an)
- * and uncomment the first <source> below.
+ * and wire a second `<source media="(max-width: 639px)" />`.
  */
-const VIDEO_SRC = '/muted.mp4#t=0.001'
+const VIDEO_SRC = '/muted.mp4'
 
 type ComingSoonHeroVideoProps = {
-  /** When true, effect re-runs so `load()`/`play()` get a second chance after the intro layer is gone (same DOM, HTTP cache). */
+  /** After the intro unmounts, call `play()` again — without `load()`, so we do not reset iOS media-user-gesture state. */
   playGate: boolean
+}
+
+function applyInlineAutoplayAttrs(video: HTMLVideoElement) {
+  video.muted = true
+  video.defaultMuted = true
+  video.playsInline = true
+  video.setAttribute('muted', '')
+  video.setAttribute('playsinline', '')
+  video.setAttribute('webkit-playsinline', 'true')
+  video.setAttribute('x5-playsinline', 'true')
 }
 
 export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate }: ComingSoonHeroVideoProps) {
@@ -26,10 +36,6 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     const video = ref.current
     if (!video) return
 
-    if (playGate) {
-      readyOnce.current = false
-    }
-
     let cancelled = false
 
     const raiseReady = () => {
@@ -39,37 +45,23 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       setFailed(false)
     }
 
-    const attemptPlay = async () => {
+    const attemptPlay = () => {
       if (cancelled) return
-      try {
-        const playPromise = video.play()
-        if (playPromise && typeof playPromise.then === 'function') {
-          await playPromise
-        }
-      } catch {
-        // iOS can reject autoplay promises in Low Power mode/settings.
-        // Do not trigger fallback unless media loading actually fails.
-      }
+      applyInlineAutoplayAttrs(video)
+      void video.play().catch(() => {
+        /* autoplay policy / Low Power — first real tap still unlocks via pointer listener */
+      })
     }
 
-    video.muted = true
-    video.defaultMuted = true
-    video.playsInline = true
-    video.setAttribute('muted', '')
-    video.setAttribute('autoplay', '')
-    video.setAttribute('playsinline', '')
-    video.setAttribute('webkit-playsinline', 'true')
-    video.setAttribute('x5-playsinline', 'true')
+    applyInlineAutoplayAttrs(video)
     video.preload = 'auto'
-    if (!video.getAttribute('src')) {
-      video.src = VIDEO_SRC
-    }
-    video.load()
+    // Do NOT call video.load() here: on iOS/WebKit it commonly forces the next play()
+    // onto the "user gesture required" path and leaves the inline play overlay up.
 
     const onLoadedMetadata = () => {
       if (cancelled) return
       setFailed(false)
-      void attemptPlay()
+      attemptPlay()
     }
 
     const onLoadedData = () => {
@@ -81,7 +73,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     const onCanPlay = () => {
       if (cancelled) return
       raiseReady()
-      void attemptPlay()
+      attemptPlay()
     }
 
     const onPlaying = () => {
@@ -104,15 +96,20 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
         return
       }
       setFailed(false)
-      void attemptPlay()
+      attemptPlay()
     }
 
-    const kickGesture = () => {
-      void attemptPlay()
+    /** WebKit only unlocks muted autoplay if play() runs in the same turn as a user input. */
+    const onUserUnlock = () => {
+      attemptPlay()
     }
 
     const onPageShow = (ev: PageTransitionEvent) => {
-      if (ev.persisted) void attemptPlay()
+      if (ev.persisted) attemptPlay()
+    }
+
+    const onVisibility = () => {
+      if (!document.hidden) attemptPlay()
     }
 
     video.addEventListener('loadedmetadata', onLoadedMetadata)
@@ -121,37 +118,18 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     video.addEventListener('playing', onPlaying)
     video.addEventListener('error', onError)
 
-    void attemptPlay()
-    requestAnimationFrame(() => {
-      if (cancelled) return
-      requestAnimationFrame(() => {
-        if (cancelled) return
-        void attemptPlay()
-      })
-    })
+    attemptPlay()
+    queueMicrotask(attemptPlay)
 
-    let n = 0
-    const iv = window.setInterval(() => {
-      if (cancelled || n++ >= 10) {
-        window.clearInterval(iv)
-        return
-      }
-      if (video.paused) void attemptPlay()
-    }, 350)
-
-    window.addEventListener('touchstart', kickGesture, { passive: true, capture: true })
-    window.addEventListener('click', kickGesture, { capture: true })
-    const onVisibility = () => {
-      if (!document.hidden) void attemptPlay()
-    }
+    window.addEventListener('pointerdown', onUserUnlock, { capture: true })
+    window.addEventListener('touchend', onUserUnlock, { capture: true, passive: true })
     document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('pageshow', onPageShow)
 
     return () => {
       cancelled = true
-      window.clearInterval(iv)
-      window.removeEventListener('touchstart', kickGesture, { capture: true } as AddEventListenerOptions)
-      window.removeEventListener('click', kickGesture, { capture: true } as AddEventListenerOptions)
+      window.removeEventListener('pointerdown', onUserUnlock, { capture: true })
+      window.removeEventListener('touchend', onUserUnlock, { capture: true } as AddEventListenerOptions)
       document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('pageshow', onPageShow)
       video.removeEventListener('loadedmetadata', onLoadedMetadata)
@@ -160,6 +138,17 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       video.removeEventListener('playing', onPlaying)
       video.removeEventListener('error', onError)
     }
+  }, [])
+
+  useEffect(() => {
+    if (!playGate) return
+    const video = ref.current
+    if (!video) return
+    applyInlineAutoplayAttrs(video)
+    queueMicrotask(() => {
+      applyInlineAutoplayAttrs(video)
+      void video.play().catch(() => {})
+    })
   }, [playGate])
 
   return (
@@ -174,8 +163,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
           loop
           preload="auto"
           poster="/black8.jpg"
-          controls={false}
-          className={`h-full w-full object-cover object-[52%_46%] sm:object-center ${
+          className={`coming-soon-hero-video h-full w-full object-cover object-[52%_46%] sm:object-center ${
             failed
               ? 'opacity-0'
               : ready
