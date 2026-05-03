@@ -9,7 +9,14 @@ import { memo, useEffect, useRef, useState } from 'react'
  * For smoother phones, add `public/muted-mobile.mp4` (720p ~2.5–3 Mbps, +faststart, -an)
  * and uncomment the first <source> below.
  */
-export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo() {
+const VIDEO_SRC = '/muted.mp4#t=0.001'
+
+type ComingSoonHeroVideoProps = {
+  /** When true, effect re-runs so `load()`/`play()` get a second chance after the intro layer is gone (same DOM, HTTP cache). */
+  playGate: boolean
+}
+
+export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate }: ComingSoonHeroVideoProps) {
   const ref = useRef<HTMLVideoElement | null>(null)
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -18,6 +25,10 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo() {
   useEffect(() => {
     const video = ref.current
     if (!video) return
+
+    if (playGate) {
+      readyOnce.current = false
+    }
 
     let cancelled = false
 
@@ -44,14 +55,15 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo() {
     video.muted = true
     video.defaultMuted = true
     video.playsInline = true
-    video.disablePictureInPicture = true
     video.setAttribute('muted', '')
     video.setAttribute('autoplay', '')
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', 'true')
+    video.setAttribute('x5-playsinline', 'true')
     video.preload = 'auto'
-    // `load()` resets the element and starts fetching after attribute fixups — required for
-    // reliable first-frame / autoplay on iOS Safari and Chrome Android after React hydration.
+    if (!video.getAttribute('src')) {
+      video.src = VIDEO_SRC
+    }
     video.load()
 
     const onLoadedMetadata = () => {
@@ -95,6 +107,14 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo() {
       void attemptPlay()
     }
 
+    const kickGesture = () => {
+      void attemptPlay()
+    }
+
+    const onPageShow = (ev: PageTransitionEvent) => {
+      if (ev.persisted) void attemptPlay()
+    }
+
     video.addEventListener('loadedmetadata', onLoadedMetadata)
     video.addEventListener('loadeddata', onLoadedData)
     video.addEventListener('canplay', onCanPlay)
@@ -110,42 +130,59 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo() {
       })
     })
 
+    let n = 0
+    const iv = window.setInterval(() => {
+      if (cancelled || n++ >= 10) {
+        window.clearInterval(iv)
+        return
+      }
+      if (video.paused) void attemptPlay()
+    }, 350)
+
+    window.addEventListener('touchstart', kickGesture, { passive: true, capture: true })
+    window.addEventListener('click', kickGesture, { capture: true })
+    const onVisibility = () => {
+      if (!document.hidden) void attemptPlay()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('pageshow', onPageShow)
+
     return () => {
       cancelled = true
+      window.clearInterval(iv)
+      window.removeEventListener('touchstart', kickGesture, { capture: true } as AddEventListenerOptions)
+      window.removeEventListener('click', kickGesture, { capture: true } as AddEventListenerOptions)
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('pageshow', onPageShow)
       video.removeEventListener('loadedmetadata', onLoadedMetadata)
       video.removeEventListener('loadeddata', onLoadedData)
       video.removeEventListener('canplay', onCanPlay)
       video.removeEventListener('playing', onPlaying)
       video.removeEventListener('error', onError)
     }
-  }, [])
+  }, [playGate])
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="absolute inset-0 transform-gpu [backface-visibility:hidden]"
-        style={{ transformOrigin: '50% 50%' }}
-      >
+      <div className="absolute inset-0" style={{ transformOrigin: '50% 50%' }}>
         <video
           ref={ref}
+          src={VIDEO_SRC}
           autoPlay
           muted
           playsInline
           loop
           preload="auto"
           poster="/black8.jpg"
-          disablePictureInPicture
-          className={`h-full w-full object-cover object-[52%_46%] [transform:translateZ(0)] sm:object-center ${
+          controls={false}
+          className={`h-full w-full object-cover object-[52%_46%] sm:object-center ${
             failed
               ? 'opacity-0'
               : ready
                 ? 'opacity-100 max-sm:opacity-[0.995] sm:opacity-[0.97]'
                 : 'opacity-[0.94] max-sm:opacity-[0.97]'
           } max-sm:transition-none sm:transition-opacity sm:duration-200 sm:ease-out`}
-        >
-          {/* <source src="/muted-mobile.mp4" type="video/mp4" media="(max-width: 639px)" /> */}
-          <source src="/muted.mp4" type="video/mp4" />
-        </video>
+        />
         {failed && (
           <div className="absolute inset-0">
             <img
