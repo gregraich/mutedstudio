@@ -56,9 +56,16 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const readyOnce = useRef(false)
+  const prevResolvedSrc = useRef<string | null>(null)
 
-  /** Reset “ready” after paint when the URL changes — avoids setState during layout on the video. */
+  /** Only reset “ready” when the URL actually changes — never on first mount (that was clearing desktop after canplay). */
   useEffect(() => {
+    if (prevResolvedSrc.current === null) {
+      prevResolvedSrc.current = resolvedSrc
+      return
+    }
+    if (prevResolvedSrc.current === resolvedSrc) return
+    prevResolvedSrc.current = resolvedSrc
     readyOnce.current = false
     setReady(false)
   }, [resolvedSrc])
@@ -193,19 +200,18 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     })
   }, [playGate])
 
-  /** One unlock attempt on first touch (iOS Low Power / strict autoplay). */
+  /** First-touch unlock on small viewports only (does not touch desktop mouse flow). */
   useEffect(() => {
     const unlock = () => {
+      if (!window.matchMedia('(max-width: 639px)').matches) return
       const v = ref.current
       if (!v) return
       applyInlineAutoplayAttrs(v)
       void v.play().catch(() => {})
     }
     window.addEventListener('touchstart', unlock, { passive: true, capture: true, once: true })
-    window.addEventListener('pointerdown', unlock, { capture: true, once: true })
     return () => {
       window.removeEventListener('touchstart', unlock, { capture: true } as AddEventListenerOptions)
-      window.removeEventListener('pointerdown', unlock, { capture: true } as AddEventListenerOptions)
     }
   }, [])
 
@@ -230,7 +236,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
           poster="/black8.jpg"
           suppressHydrationWarning
           onPointerDownCapture={onVideoPointerDown}
-          className={`h-full min-h-0 w-full min-w-0 object-cover object-[52%_46%] sm:object-center ${
+          className={`h-full w-full object-cover object-[52%_46%] sm:object-center ${
             failed
               ? 'opacity-0'
               : ready
