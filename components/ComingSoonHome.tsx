@@ -113,10 +113,11 @@ export default function ComingSoonHome() {
           delay: compactMotion ? 0 : fadeOutIntro ? 0.08 : 0,
         }}
       >
-        <div
-          key={fadeOutIntro ? 'coming-soon-reveal' : 'coming-soon-pending'}
-          className="pointer-events-none relative isolate flex flex-1 flex-col items-center justify-center py-7 text-center max-sm:-translate-y-[0.5vh] sm:translate-y-0 sm:py-16 [&_*]:pointer-events-none"
-        >
+        <div className="flex w-full flex-1 flex-col items-center justify-center max-sm:-translate-y-[0.5vh] sm:translate-y-0">
+          <div
+            key={fadeOutIntro ? 'coming-soon-reveal' : 'coming-soon-pending'}
+            className="pointer-events-none relative isolate flex flex-col items-center py-7 text-center sm:py-16 [&_*]:pointer-events-none"
+          >
           <div
             className="pointer-events-none absolute inset-x-0 top-[2%] bottom-[10%] z-0 max-sm:block sm:hidden"
             aria-hidden
@@ -134,7 +135,7 @@ export default function ComingSoonHome() {
             }}
           />
           <div className="relative z-10 flex w-full max-w-2xl flex-col items-center px-0 text-center sm:max-w-4xl sm:px-0">
-          <motion.div
+            <motion.div
             initial={compactMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={transitionBase}
@@ -196,7 +197,7 @@ export default function ComingSoonHome() {
           </div>
         </div>
 
-        <div className="relative z-10 mt-9 w-full pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
+        <div className="pointer-events-auto relative z-20 mt-9 w-full shrink-0 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
           <div className="mx-auto w-full max-w-xl text-center sm:min-h-[220px] lg:min-h-[236px]">
             <div
               className="mx-auto h-px w-12 bg-gradient-to-r from-transparent via-accent/50 to-transparent opacity-80 sm:mt-0 sm:h-px sm:w-24 sm:via-accent/65 sm:opacity-100"
@@ -257,6 +258,7 @@ export default function ComingSoonHome() {
               </div>
             </footer>
           </div>
+        </div>
         </div>
       </motion.div>
     </main>

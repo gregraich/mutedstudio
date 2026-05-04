@@ -138,9 +138,9 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   }, [playGate, attemptPlay])
 
   return (
-    <div className="pointer-events-auto absolute inset-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
       <div
-        className="absolute inset-0 transform-gpu [backface-visibility:hidden]"
+        className="pointer-events-none absolute inset-0 transform-gpu [backface-visibility:hidden]"
         style={{ transformOrigin: '50% 50%' }}
       >
         <video
@@ -152,7 +152,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
           loop
           preload="auto"
           disablePictureInPicture
-          className={`h-full w-full object-cover object-[52%_46%] [transform:translateZ(0)] sm:object-center ${
+          className={`pointer-events-auto h-full w-full object-cover object-[52%_46%] [transform:translateZ(0)] sm:object-center ${
             failed
               ? 'opacity-0'
               : ready
