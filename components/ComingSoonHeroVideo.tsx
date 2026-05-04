@@ -40,7 +40,8 @@ function applyInlineAutoplayAttrs(video: HTMLVideoElement) {
   video.playsInline = true
   video.setAttribute('muted', '')
   video.setAttribute('autoplay', '')
-  video.setAttribute('playsinline', '')
+  // iOS Safari expects literal playsinline / webkit-playsinline with a value on the DOM node.
+  video.setAttribute('playsinline', 'true')
   video.setAttribute('webkit-playsinline', 'true')
   video.setAttribute('x5-playsinline', 'true')
 }
@@ -52,6 +53,10 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
 
   const resolvedSrc =
     maxSm && !mobileAssetBypass ? VIDEO_SRC_MOBILE : VIDEO_SRC_DESKTOP
+
+  /** Media fragment nudges iOS to attach the decoder; harmless on Chromium Android. */
+  const playbackSrc =
+    maxSm && !resolvedSrc.includes('#') ? `${resolvedSrc}#t=0.001` : resolvedSrc
 
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -97,6 +102,13 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     const onLoadedMetadata = () => {
       if (cancelled) return
       setFailed(false)
+      if (maxSm) {
+        try {
+          if (video.currentTime === 0) video.currentTime = 0.001
+        } catch {
+          /* ignore seek errors before data */
+        }
+      }
       attemptPlay()
     }
 
@@ -183,7 +195,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       video.removeEventListener('stalled', onStallOrWait)
       video.removeEventListener('waiting', onStallOrWait)
     }
-  }, [resolvedSrc, maxSm, mobileAssetBypass])
+  }, [resolvedSrc, maxSm, mobileAssetBypass, playbackSrc])
 
   useEffect(() => {
     if (!maxSm) setMobileAssetBypass(false)
@@ -227,21 +239,23 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       <div className="absolute inset-0" style={{ transformOrigin: '50% 50%' }}>
         <video
           ref={ref}
-          src={resolvedSrc}
-          muted
+          src={playbackSrc}
           playsInline
+          muted
           autoPlay
           loop
           preload="auto"
-          poster="/black8.jpg"
+          poster={maxSm ? undefined : '/black8.jpg'}
           suppressHydrationWarning
           onPointerDownCapture={onVideoPointerDown}
           className={`h-full w-full object-cover object-[52%_46%] sm:object-center ${
             failed
               ? 'opacity-0'
-              : ready
-                ? 'opacity-100 max-sm:opacity-[0.995] sm:opacity-[0.97]'
-                : 'opacity-[0.94] max-sm:opacity-[0.97]'
+              : maxSm
+                ? 'opacity-100'
+                : ready
+                  ? 'opacity-100 max-sm:opacity-[0.995] sm:opacity-[0.97]'
+                  : 'opacity-[0.94] max-sm:opacity-[0.97]'
           } max-sm:transition-none sm:transition-opacity sm:duration-200 sm:ease-out`}
         />
         {failed && (
