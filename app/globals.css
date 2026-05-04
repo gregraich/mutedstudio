@@ -422,11 +422,3 @@ a.coming-soon-contact-mail:focus-visible {
   border-right: 2px solid white;
   animation: typewriter 2s steps(17) forwards;
 }
-
-/* Hero background video: hide WebKit inline play / media chrome so taps hit our overlay */
-video.hero-bg-video::-webkit-media-controls,
-video.hero-bg-video::-webkit-media-controls-enclosure,
-video.hero-bg-video::-webkit-media-controls-start-playback-button {
-  display: none !important;
-  -webkit-appearance: none;
-}
