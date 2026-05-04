@@ -6,9 +6,9 @@ import { memo, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStor
  * Memoized background video so parent re-renders (intro, contact, framer) do not
  * reconcile the <video> DOM unnecessarily — that can contribute to Safari/iOS stutter.
  *
- * The `<video>` is mounted only after the client commits (see `mediaMounted`). That
- * avoids iOS Safari hydration bugs where the element is created with one `src` from SSR
- * and immediately swapped for another on narrow viewports.
+ * Narrow viewports: transparent overlay calls `play()` in the pointer gesture stack
+ * (WebKit often ignores `play()` unless it runs from a tap). Native media chrome is
+ * hidden via `.hero-bg-video` in globals.css so the big play glyph does not block taps.
  */
 const VIDEO_SRC_DESKTOP = '/muted.mp4'
 const VIDEO_SRC_MOBILE = '/muted-mobile.mp4'
@@ -38,6 +38,8 @@ function applyInlineAutoplayAttrs(video: HTMLVideoElement) {
   video.defaultMuted = true
   video.playsInline = true
   video.loop = true
+  video.controls = false
+  video.removeAttribute('controls')
   video.setAttribute('muted', '')
   video.setAttribute('loop', '')
   video.setAttribute('autoplay', '')
@@ -50,12 +52,6 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   const ref = useRef<HTMLVideoElement | null>(null)
   const maxSm = useSyncExternalStore(subscribeMaxSm, getMaxSmSnapshot, getMaxSmServerSnapshot)
   const [mobileAssetBypass, setMobileAssetBypass] = useState(false)
-
-  /** Do not mount <video> until after client layout — avoids iOS hydration/src churn (useLayoutEffect survives Strict Mode). */
-  const [mediaMounted, setMediaMounted] = useState(false)
-  useLayoutEffect(() => {
-    setMediaMounted(true)
-  }, [])
 
   const resolvedSrc =
     maxSm && !mobileAssetBypass ? VIDEO_SRC_MOBILE : VIDEO_SRC_DESKTOP
@@ -79,8 +75,14 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     setReady(false)
   }, [resolvedSrc])
 
+  const tapToPlay = () => {
+    const video = ref.current
+    if (!video) return
+    applyInlineAutoplayAttrs(video)
+    void video.play().catch(() => {})
+  }
+
   useLayoutEffect(() => {
-    if (!mediaMounted) return
     const video = ref.current
     if (!video) return
 
@@ -181,7 +183,6 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
 
     attemptPlay()
     queueMicrotask(attemptPlay)
-    queueMicrotask(() => queueMicrotask(attemptPlay))
 
     document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('pageshow', onPageShow)
@@ -199,14 +200,14 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       video.removeEventListener('stalled', onStallOrWait)
       video.removeEventListener('waiting', onStallOrWait)
     }
-  }, [resolvedSrc, maxSm, mobileAssetBypass, playbackSrc, mediaMounted])
+  }, [resolvedSrc, maxSm, mobileAssetBypass, playbackSrc])
 
   useEffect(() => {
     if (!maxSm) setMobileAssetBypass(false)
   }, [maxSm])
 
   useEffect(() => {
-    if (!playGate || !mediaMounted) return
+    if (!playGate) return
     const video = ref.current
     if (!video) return
     applyInlineAutoplayAttrs(video)
@@ -214,58 +215,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       applyInlineAutoplayAttrs(video)
       void video.play().catch(() => {})
     })
-  }, [playGate, mediaMounted])
-
-  /** iOS: keep calling play() on touch until the element is actually playing. */
-  useEffect(() => {
-    if (!mediaMounted || !maxSm) return
-    const node = ref.current
-    if (!node) return
-
-    const kick = () => {
-      const v = ref.current
-      if (!v || v.paused === false) return
-      applyInlineAutoplayAttrs(v)
-      void v.play().catch(() => {})
-    }
-
-    const opts: AddEventListenerOptions = { passive: true, capture: true }
-    window.addEventListener('touchstart', kick, opts)
-    window.addEventListener('touchend', kick, opts)
-
-    const onPlaying = () => {
-      window.removeEventListener('touchstart', kick, opts)
-      window.removeEventListener('touchend', kick, opts)
-      node.removeEventListener('playing', onPlaying)
-    }
-    node.addEventListener('playing', onPlaying)
-
-    return () => {
-      window.removeEventListener('touchstart', kick, opts)
-      window.removeEventListener('touchend', kick, opts)
-      node.removeEventListener('playing', onPlaying)
-    }
-  }, [mediaMounted, maxSm])
-
-  const onVideoPointerDown = () => {
-    const video = ref.current
-    if (!video) return
-    applyInlineAutoplayAttrs(video)
-    void video.play().catch(() => {})
-  }
-
-  const posterClass =
-    'h-full w-full object-cover object-[52%_46%] sm:object-center max-sm:transition-none sm:transition-opacity sm:duration-200 sm:ease-out'
-
-  if (!mediaMounted) {
-    return (
-      <div className="pointer-events-auto absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0" style={{ transformOrigin: '50% 50%' }}>
-          <img src="/black8.jpg" alt="" className={`opacity-100 ${posterClass}`} loading="eager" decoding="async" />
-        </div>
-      </div>
-    )
-  }
+  }, [playGate])
 
   return (
     <div className="pointer-events-auto absolute inset-0 overflow-hidden">
@@ -278,11 +228,10 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
           autoPlay
           loop
           preload="auto"
-          poster={maxSm ? undefined : '/black8.jpg'}
           suppressHydrationWarning
-          onPointerDownCapture={onVideoPointerDown}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          className={`h-full w-full object-cover object-[52%_46%] sm:object-center ${
+          className={`hero-bg-video h-full w-full object-cover object-[52%_46%] sm:object-center ${
+            maxSm ? 'pointer-events-none' : ''
+          } ${
             failed
               ? 'opacity-0'
               : maxSm
@@ -291,9 +240,20 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
                   ? 'opacity-100 max-sm:opacity-[0.995] sm:opacity-[0.97]'
                   : 'opacity-[0.94] max-sm:opacity-[0.97]'
           } max-sm:transition-none sm:transition-opacity sm:duration-200 sm:ease-out`}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          onPointerDownCapture={maxSm ? undefined : tapToPlay}
         />
+        {maxSm && !failed && (
+          <div
+            className="absolute inset-0 z-[2] touch-manipulation"
+            aria-hidden
+            onPointerDown={() => {
+              tapToPlay()
+            }}
+          />
+        )}
         {failed && (
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 z-[3]">
             <img src="/black8.jpg" alt="" className="h-full w-full object-cover" loading="eager" decoding="async" />
           </div>
         )}
