@@ -6,9 +6,9 @@ import { memo, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStor
  * Memoized background video so parent re-renders (intro, contact, framer) do not
  * reconcile the <video> DOM unnecessarily — that can contribute to Safari/iOS stutter.
  *
- * Narrow viewports use `muted-mobile.mp4` when available; on load failure we fall back
- * to `muted.mp4` (same URL check as `onError` — do not rely on `currentSrc` containing
- * the filename; it is often empty when the resource errors).
+ * The `<video>` is mounted only after the client commits (see `mediaMounted`). That
+ * avoids iOS Safari hydration bugs where the element is created with one `src` from SSR
+ * and immediately swapped for another on narrow viewports.
  */
 const VIDEO_SRC_DESKTOP = '/muted.mp4'
 const VIDEO_SRC_MOBILE = '/muted-mobile.mp4'
@@ -30,7 +30,6 @@ function getMaxSmServerSnapshot() {
 }
 
 type ComingSoonHeroVideoProps = {
-  /** After the intro unmounts, call `play()` again — without `load()`, so we do not reset iOS media-user-gesture state. */
   playGate: boolean
 }
 
@@ -38,9 +37,10 @@ function applyInlineAutoplayAttrs(video: HTMLVideoElement) {
   video.muted = true
   video.defaultMuted = true
   video.playsInline = true
+  video.loop = true
   video.setAttribute('muted', '')
+  video.setAttribute('loop', '')
   video.setAttribute('autoplay', '')
-  // iOS Safari expects literal playsinline / webkit-playsinline with a value on the DOM node.
   video.setAttribute('playsinline', 'true')
   video.setAttribute('webkit-playsinline', 'true')
   video.setAttribute('x5-playsinline', 'true')
@@ -51,10 +51,15 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   const maxSm = useSyncExternalStore(subscribeMaxSm, getMaxSmSnapshot, getMaxSmServerSnapshot)
   const [mobileAssetBypass, setMobileAssetBypass] = useState(false)
 
+  /** Do not mount <video> until after client layout — avoids iOS hydration/src churn (useLayoutEffect survives Strict Mode). */
+  const [mediaMounted, setMediaMounted] = useState(false)
+  useLayoutEffect(() => {
+    setMediaMounted(true)
+  }, [])
+
   const resolvedSrc =
     maxSm && !mobileAssetBypass ? VIDEO_SRC_MOBILE : VIDEO_SRC_DESKTOP
 
-  /** Media fragment nudges iOS to attach the decoder; harmless on Chromium Android. */
   const playbackSrc =
     maxSm && !resolvedSrc.includes('#') ? `${resolvedSrc}#t=0.001` : resolvedSrc
 
@@ -63,7 +68,6 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   const readyOnce = useRef(false)
   const prevResolvedSrc = useRef<string | null>(null)
 
-  /** Only reset “ready” when the URL actually changes — never on first mount (that was clearing desktop after canplay). */
   useEffect(() => {
     if (prevResolvedSrc.current === null) {
       prevResolvedSrc.current = resolvedSrc
@@ -76,6 +80,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   }, [resolvedSrc])
 
   useLayoutEffect(() => {
+    if (!mediaMounted) return
     const video = ref.current
     if (!video) return
 
@@ -91,9 +96,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     const attemptPlay = () => {
       if (cancelled) return
       applyInlineAutoplayAttrs(video)
-      void video.play().catch(() => {
-        /* autoplay policy / Low Power */
-      })
+      void video.play().catch(() => {})
     }
 
     applyInlineAutoplayAttrs(video)
@@ -106,7 +109,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
         try {
           if (video.currentTime === 0) video.currentTime = 0.001
         } catch {
-          /* ignore seek errors before data */
+          /* ignore */
         }
       }
       attemptPlay()
@@ -178,6 +181,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
 
     attemptPlay()
     queueMicrotask(attemptPlay)
+    queueMicrotask(() => queueMicrotask(attemptPlay))
 
     document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('pageshow', onPageShow)
@@ -195,14 +199,14 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       video.removeEventListener('stalled', onStallOrWait)
       video.removeEventListener('waiting', onStallOrWait)
     }
-  }, [resolvedSrc, maxSm, mobileAssetBypass, playbackSrc])
+  }, [resolvedSrc, maxSm, mobileAssetBypass, playbackSrc, mediaMounted])
 
   useEffect(() => {
     if (!maxSm) setMobileAssetBypass(false)
   }, [maxSm])
 
   useEffect(() => {
-    if (!playGate) return
+    if (!playGate || !mediaMounted) return
     const video = ref.current
     if (!video) return
     applyInlineAutoplayAttrs(video)
@@ -210,28 +214,57 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       applyInlineAutoplayAttrs(video)
       void video.play().catch(() => {})
     })
-  }, [playGate])
+  }, [playGate, mediaMounted])
 
-  /** First-touch unlock on small viewports only (does not touch desktop mouse flow). */
+  /** iOS: keep calling play() on touch until the element is actually playing. */
   useEffect(() => {
-    const unlock = () => {
-      if (!window.matchMedia('(max-width: 639px)').matches) return
+    if (!mediaMounted || !maxSm) return
+    const node = ref.current
+    if (!node) return
+
+    const kick = () => {
       const v = ref.current
-      if (!v) return
+      if (!v || v.paused === false) return
       applyInlineAutoplayAttrs(v)
       void v.play().catch(() => {})
     }
-    window.addEventListener('touchstart', unlock, { passive: true, capture: true, once: true })
-    return () => {
-      window.removeEventListener('touchstart', unlock, { capture: true } as AddEventListenerOptions)
+
+    const opts: AddEventListenerOptions = { passive: true, capture: true }
+    window.addEventListener('touchstart', kick, opts)
+    window.addEventListener('touchend', kick, opts)
+
+    const onPlaying = () => {
+      window.removeEventListener('touchstart', kick, opts)
+      window.removeEventListener('touchend', kick, opts)
+      node.removeEventListener('playing', onPlaying)
     }
-  }, [])
+    node.addEventListener('playing', onPlaying)
+
+    return () => {
+      window.removeEventListener('touchstart', kick, opts)
+      window.removeEventListener('touchend', kick, opts)
+      node.removeEventListener('playing', onPlaying)
+    }
+  }, [mediaMounted, maxSm])
 
   const onVideoPointerDown = () => {
     const video = ref.current
     if (!video) return
     applyInlineAutoplayAttrs(video)
     void video.play().catch(() => {})
+  }
+
+  const posterClass =
+    'h-full w-full object-cover object-[52%_46%] sm:object-center max-sm:transition-none sm:transition-opacity sm:duration-200 sm:ease-out'
+
+  if (!mediaMounted) {
+    return (
+      <div className="pointer-events-auto absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0" style={{ transformOrigin: '50% 50%' }}>
+          <img src="/black8.jpg" alt="" className={`opacity-100 ${posterClass}`} loading="eager" decoding="async" />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -248,6 +281,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
           poster={maxSm ? undefined : '/black8.jpg'}
           suppressHydrationWarning
           onPointerDownCapture={onVideoPointerDown}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           className={`h-full w-full object-cover object-[52%_46%] sm:object-center ${
             failed
               ? 'opacity-0'
@@ -260,13 +294,7 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
         />
         {failed && (
           <div className="absolute inset-0">
-            <img
-              src="/black8.jpg"
-              alt=""
-              className="h-full w-full object-cover"
-              loading="eager"
-              decoding="async"
-            />
+            <img src="/black8.jpg" alt="" className="h-full w-full object-cover" loading="eager" decoding="async" />
           </div>
         )}
       </div>
