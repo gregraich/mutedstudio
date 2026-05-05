@@ -1,6 +1,8 @@
 'use client'
 
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+
+const HERO_MP4 = '/muted.mp4#t=0.001'
 
 /**
  * Background hero video. Parent stack uses `pointer-events-none`; this subtree
@@ -10,6 +12,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react'
 function armVideo(video: HTMLVideoElement) {
   video.muted = true
   video.defaultMuted = true
+  video.volume = 0
   video.playsInline = true
   video.loop = true
   video.controls = false
@@ -19,6 +22,7 @@ function armVideo(video: HTMLVideoElement) {
   video.setAttribute('loop', '')
   video.setAttribute('playsinline', '')
   video.setAttribute('webkit-playsinline', 'true')
+  video.setAttribute('x5-playsinline', 'true')
   video.setAttribute('autoplay', '')
   video.preload = 'auto'
 }
@@ -42,6 +46,12 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     })
   }, [])
 
+  /** iOS: muted / playsinline must be applied before the first decode tick. */
+  useLayoutEffect(() => {
+    const video = ref.current
+    if (video) armVideo(video)
+  }, [])
+
   useEffect(() => {
     const video = ref.current
     if (!video) return
@@ -60,6 +70,11 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
     const onLoadedMetadata = () => {
       if (cancelled) return
       setFailed(false)
+      attemptPlay()
+    }
+
+    const onLoadedData = () => {
+      if (cancelled) return
       attemptPlay()
     }
 
@@ -92,12 +107,24 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       if (ev.persisted) attemptPlay()
     }
 
+    const onResize = () => attemptPlay()
+
+    const onBuffer = () => {
+      if (!cancelled) attemptPlay()
+    }
+
     video.addEventListener('loadedmetadata', onLoadedMetadata)
+    video.addEventListener('loadeddata', onLoadedData)
     video.addEventListener('canplay', onCanPlay)
+    video.addEventListener('canplaythrough', onBuffer)
     video.addEventListener('playing', onPlaying)
+    video.addEventListener('waiting', onBuffer)
+    video.addEventListener('stalled', onBuffer)
     video.addEventListener('error', onError)
     document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('pageshow', onPageShow)
+    window.addEventListener('resize', onResize)
+    window.addEventListener('orientationchange', onResize)
 
     attemptPlay()
     const raf = requestAnimationFrame(() => attemptPlay())
@@ -106,11 +133,17 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
       cancelled = true
       cancelAnimationFrame(raf)
       video.removeEventListener('loadedmetadata', onLoadedMetadata)
+      video.removeEventListener('loadeddata', onLoadedData)
       video.removeEventListener('canplay', onCanPlay)
+      video.removeEventListener('canplaythrough', onBuffer)
       video.removeEventListener('playing', onPlaying)
+      video.removeEventListener('waiting', onBuffer)
+      video.removeEventListener('stalled', onBuffer)
       video.removeEventListener('error', onError)
       document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('pageshow', onPageShow)
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('orientationchange', onResize)
     }
   }, [attemptPlay])
 
@@ -118,10 +151,14 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   useEffect(() => {
     const unlock = () => attemptPlay()
     window.addEventListener('touchstart', unlock, { capture: true, passive: true })
+    window.addEventListener('touchend', unlock, { capture: true, passive: true })
     window.addEventListener('pointerdown', unlock, { capture: true, passive: true })
+    window.addEventListener('click', unlock, { capture: true })
     return () => {
       window.removeEventListener('touchstart', unlock, { capture: true })
+      window.removeEventListener('touchend', unlock, { capture: true })
       window.removeEventListener('pointerdown', unlock, { capture: true })
+      window.removeEventListener('click', unlock, { capture: true })
     }
   }, [attemptPlay])
 
@@ -138,21 +175,20 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   }, [playGate, attemptPlay])
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 min-h-[100svh] overflow-hidden">
       <div
-        className="pointer-events-none absolute inset-0 transform-gpu [backface-visibility:hidden]"
+        className="pointer-events-none absolute inset-0 min-h-[100svh] transform-gpu [backface-visibility:hidden]"
         style={{ transformOrigin: '50% 50%' }}
       >
         <video
           ref={ref}
-          src="/muted.mp4"
           autoPlay
           muted
           playsInline
           loop
           preload="auto"
           disablePictureInPicture
-          className={`pointer-events-auto h-full w-full object-cover object-[52%_46%] [transform:translateZ(0)] sm:object-center ${
+          className={`pointer-events-auto h-full min-h-[100svh] w-full object-cover object-[52%_46%] [transform:translateZ(0)] sm:min-h-0 sm:object-center ${
             failed
               ? 'opacity-0'
               : ready
@@ -160,7 +196,9 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
                 : 'opacity-[0.94] max-sm:opacity-[0.97]'
           } max-sm:transition-none sm:transition-opacity sm:duration-200 sm:ease-out`}
           onPointerDownCapture={() => attemptPlay()}
-        />
+        >
+          <source src={HERO_MP4} type="video/mp4" />
+        </video>
         {failed && (
           <div className="absolute inset-0">
             <img
