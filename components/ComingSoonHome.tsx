@@ -51,7 +51,7 @@ export default function ComingSoonHome() {
   return (
     <main className="relative flex min-h-[100svh] flex-col bg-[#070707] text-foreground overflow-hidden sm:min-h-[100dvh]">
       <IntroAnimation showIntro={showIntro} fadeOutIntro={fadeOutIntro} onComplete={handleIntroComplete} />
-      <div className="pointer-events-none absolute inset-0 z-0 isolate">
+      <div className="pointer-events-none absolute inset-0 z-0 sm:isolate">
         <ComingSoonHeroVideo playGate={fadeOutIntro || !showIntro} />
 
         <div

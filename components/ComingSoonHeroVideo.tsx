@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
+/** `#t=0.001` nudges iOS Safari to decode/show frame 0; omitting it often yields a stuck black tile. */
 const HERO_MP4 = '/muted.mp4#t=0.001'
 
 /**
@@ -166,18 +167,28 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
   useEffect(() => {
     if (!playGate) return
     attemptPlay()
-    const t = window.setTimeout(attemptPlay, 50)
+    const t50 = window.setTimeout(attemptPlay, 50)
+    const t200 = window.setTimeout(attemptPlay, 200)
+    const t600 = window.setTimeout(attemptPlay, 600)
     const raf = requestAnimationFrame(attemptPlay)
     return () => {
-      window.clearTimeout(t)
+      window.clearTimeout(t50)
+      window.clearTimeout(t200)
+      window.clearTimeout(t600)
       cancelAnimationFrame(raf)
     }
   }, [playGate, attemptPlay])
 
+  /**
+   * Mobile Safari often paints a black box when `<video>` sits under composited
+   * transforms or fractional opacity. Skip GPU transforms on small screens; keep
+   * translateZ / backface polish for `sm+` only. Parent `sm:isolate` avoids
+   * stacking-context issues on small viewports (see ComingSoonHome).
+   */
   return (
     <div className="pointer-events-none absolute inset-0 min-h-[100svh] overflow-hidden">
       <div
-        className="pointer-events-none absolute inset-0 min-h-[100svh] transform-gpu [backface-visibility:hidden]"
+        className="pointer-events-none absolute inset-0 h-full min-h-[100svh] w-full sm:transform-gpu sm:[backface-visibility:hidden]"
         style={{ transformOrigin: '50% 50%' }}
       >
         <video
@@ -188,12 +199,12 @@ export const ComingSoonHeroVideo = memo(function ComingSoonHeroVideo({ playGate 
           loop
           preload="auto"
           disablePictureInPicture
-          className={`pointer-events-auto h-full min-h-[100svh] w-full object-cover object-[52%_46%] [transform:translateZ(0)] sm:min-h-0 sm:object-center ${
+          className={`pointer-events-auto h-full min-h-[100svh] w-full object-cover object-[52%_46%] max-sm:[transform:none] sm:min-h-0 sm:object-center sm:[transform:translateZ(0)] ${
             failed
-              ? 'opacity-0'
+              ? 'pointer-events-none opacity-0'
               : ready
-                ? 'opacity-100 max-sm:opacity-[0.995] sm:opacity-[0.97]'
-                : 'opacity-[0.94] max-sm:opacity-[0.97]'
+                ? 'max-sm:opacity-100 sm:opacity-[0.97]'
+                : 'max-sm:opacity-100 opacity-[0.94] sm:opacity-[0.94]'
           } max-sm:transition-none sm:transition-opacity sm:duration-200 sm:ease-out`}
           onPointerDownCapture={() => attemptPlay()}
         >
