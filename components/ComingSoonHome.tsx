@@ -197,7 +197,7 @@ export default function ComingSoonHome() {
           </div>
         </div>
 
-        <div className="pointer-events-auto relative z-20 mt-6 w-full shrink-0 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
+        <div className="pointer-events-auto relative z-20 mt-3 w-full shrink-0 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
           <div className="mx-auto w-full max-w-xl text-center sm:min-h-[220px] lg:min-h-[236px]">
             <div
               className="mx-auto h-px w-12 bg-gradient-to-r from-transparent via-accent/50 to-transparent opacity-80 sm:mt-0 sm:h-px sm:w-24 sm:via-accent/65 sm:opacity-100"
@@ -250,7 +250,7 @@ export default function ComingSoonHome() {
                   >
                     hello@mutedstudio.ca
                   </a>
-                  <p className="mx-auto mt-2.5 max-w-md text-pretty text-[clamp(0.88rem,2.8vw,0.95rem)] font-light leading-[1.72] tracking-[0.055em] text-white/[0.62] sm:mt-3 sm:max-w-lg sm:text-[0.9rem] sm:tracking-[0.06em] sm:text-white/68">
+                  <p className="mx-auto mt-2.5 max-w-md text-pretty text-[clamp(0.88rem,2.8vw,0.95rem)] font-light leading-[1.72] tracking-[0.055em] text-white/[0.78] max-sm:tracking-[0.045em] sm:mt-3 sm:max-w-lg sm:text-[0.9rem] sm:tracking-[0.06em] sm:text-white/68">
                     We are currently accepting select new client inquiries and project invitations.
                   </p>
                 </div>
