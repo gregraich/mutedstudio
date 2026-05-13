@@ -42,11 +42,19 @@ export default function ComingSoonHome() {
 
   const compactMotion = reduceMotion || isSmallScreen
 
-  const transitionBase = compactMotion
-    ? { duration: 0.01 }
-    : { duration: 1.05, ease: easePremium }
-
-  const stagger = compactMotion ? 0 : 0.12
+  /**
+   * Reveal timeline (desktop). Each beat is deliberately spaced so no two
+   * elements compete for attention. Total runway ≈ 4.2s for an unhurried,
+   * composed entrance. Mobile / reduced-motion bypasses all of this with
+   * `initial={false}` and a near-instant duration.
+   */
+  const reveal = {
+    accent: { delay: compactMotion ? 0 : 0.2, duration: compactMotion ? 0.01 : 1.4 },
+    title: { delay: compactMotion ? 0 : 0.45, duration: compactMotion ? 0.01 : 1.8 },
+    subtitle: { delay: compactMotion ? 0 : 1.2, duration: compactMotion ? 0.01 : 1.7 },
+    tagline: { delay: compactMotion ? 0 : 1.9, duration: compactMotion ? 0.01 : 1.55 },
+    contact: { delay: compactMotion ? 0 : 2.4, duration: compactMotion ? 0.3 : 1.8 },
+  }
 
   return (
     <main className="relative flex min-h-[100svh] flex-col bg-[#070707] text-foreground overflow-hidden sm:min-h-[100dvh]">
@@ -106,11 +114,17 @@ export default function ComingSoonHome() {
         initial={false}
         animate={{
           opacity: fadeOutIntro || !showIntro ? 1 : 0,
+          y: fadeOutIntro || !showIntro ? 0 : compactMotion ? 0 : 10,
         }}
         transition={{
-          duration: compactMotion ? 0.2 : 0.95,
+          duration: compactMotion ? 0.32 : 0.7,
           ease: easePremium,
-          delay: compactMotion ? 0 : fadeOutIntro ? 0.08 : 0,
+          delay: compactMotion ? 0 : fadeOutIntro ? 0.05 : 0,
+        }}
+        style={{
+          transformOrigin: '50% 52%',
+          willChange: 'transform, opacity',
+          backfaceVisibility: 'hidden',
         }}
       >
         <div className="flex w-full flex-1 flex-col items-center justify-center max-sm:-translate-y-[0.5vh] sm:translate-y-0">
@@ -138,24 +152,26 @@ export default function ComingSoonHome() {
             <motion.div
             initial={compactMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={transitionBase}
+            transition={{
+              duration: reveal.accent.duration,
+              ease: easePremium,
+              delay: reveal.accent.delay,
+            }}
             className="mb-4 h-px w-11 bg-gradient-to-r from-transparent via-accent/55 to-transparent sm:mb-9 sm:h-px sm:w-20 sm:via-accent/70"
+            style={{ willChange: compactMotion ? undefined : 'opacity' }}
           />
 
           <motion.h1
             aria-label="Muted Studio"
-            initial={
-              compactMotion
-                ? false
-                : { opacity: 0, y: 18, scale: 0.985, filter: 'blur(12px)' }
-            }
-            animate={{ opacity: 1, y: 0, scale: 1, filter: compactMotion ? 'none' : 'blur(0px)' }}
+            initial={compactMotion ? false : { opacity: 0, x: -88 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{
-              duration: compactMotion ? 0.01 : 0.88,
+              duration: reveal.title.duration,
               ease: easePremium,
-              delay: compactMotion ? 0 : 0.22,
+              delay: reveal.title.delay,
             }}
             className="max-w-none font-light tracking-[0.13em] text-[clamp(1.95rem,9.2vw,3.4rem)] leading-[1.08] text-white [text-shadow:0_1px_18px_rgba(0,0,0,0.35)] sm:text-[clamp(1.85rem,8.2vw,4.9rem)] sm:leading-[1.1] sm:tracking-[0.14em] sm:[text-shadow:none]"
+            style={{ willChange: compactMotion ? undefined : 'transform, opacity' }}
           >
             <span className="inline-flex flex-wrap items-center justify-center gap-x-[0.04em]">
               <span>MUT</span>
@@ -170,10 +186,15 @@ export default function ComingSoonHome() {
           </motion.h1>
 
           <motion.div
-            initial={compactMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transitionBase, delay: stagger * 2 }}
+            initial={compactMotion ? false : { opacity: 0, x: 80 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: reveal.subtitle.duration,
+              ease: easePremium,
+              delay: reveal.subtitle.delay,
+            }}
             className="mx-auto mt-5 max-w-2xl sm:mt-12"
+            style={{ willChange: compactMotion ? undefined : 'transform, opacity' }}
           >
             <p className="text-[clamp(1.02rem,3.6vw,1.14rem)] font-light leading-[1.76] tracking-[0.045em] text-white/[0.91] [text-shadow:0_1px_12px_rgba(0,0,0,0.48),0_0_1px_rgba(0,0,0,0.4)] sm:text-[clamp(1.02rem,4.4vw,1.18rem)] sm:leading-[1.78] sm:tracking-[0.05em] sm:text-white/92 sm:[text-shadow:0_2px_14px_rgba(0,0,0,0.52)]">
               A design-build firm that creates refined, thoughtfully curated environments and landscapes.
@@ -181,9 +202,13 @@ export default function ComingSoonHome() {
           </motion.div>
 
           <motion.p
-            initial={compactMotion ? false : { opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transitionBase, delay: stagger * 3 }}
+            initial={compactMotion ? false : { opacity: 0, x: 56 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: reveal.tagline.duration,
+              ease: easePremium,
+              delay: reveal.tagline.delay,
+            }}
             className={`mt-4 max-w-3xl text-balance text-[clamp(0.9rem,3.2vw,1.14rem)] font-semibold uppercase leading-[1.62] tracking-[0.22em] text-white/[0.94] sm:mt-10 sm:text-[clamp(0.97rem,4.1vw,1.28rem)] sm:leading-[1.68] sm:tracking-[0.28em] ${
               reduceMotion
                 ? '[text-shadow:0_2px_12px_rgba(0,0,0,0.55)]'
@@ -191,13 +216,24 @@ export default function ComingSoonHome() {
                   ? 'coming-soon-tagline-illume-static'
                   : 'coming-soon-tagline-illume'
             }`}
+            style={{ willChange: compactMotion ? undefined : 'transform, opacity' }}
           >
             Our new digital experience is coming soon.
           </motion.p>
           </div>
         </div>
 
-        <div className="pointer-events-auto relative z-20 mt-3 w-full shrink-0 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14">
+        <motion.div
+          initial={compactMotion ? false : { opacity: 0 }}
+          animate={{ opacity: compactMotion ? 1 : fadeOutIntro || !showIntro ? 1 : 0 }}
+          transition={{
+            duration: reveal.contact.duration,
+            ease: easePremium,
+            delay: reveal.contact.delay,
+          }}
+          className="pointer-events-auto relative z-20 mt-3 w-full shrink-0 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14"
+          style={{ willChange: compactMotion ? undefined : 'opacity' }}
+        >
           <div className="mx-auto w-full max-w-xl text-center sm:min-h-[220px] lg:min-h-[236px]">
             <div
               className="mx-auto h-px w-12 bg-gradient-to-r from-transparent via-accent/50 to-transparent opacity-80 sm:mt-0 sm:h-px sm:w-24 sm:via-accent/65 sm:opacity-100"
@@ -231,19 +267,19 @@ export default function ComingSoonHome() {
                 initial={false}
                 animate={{
                   opacity: contactOpen ? 1 : 0,
-                  y: contactOpen ? 0 : isSmallScreen ? -3 : -8,
+                  y: contactOpen ? 0 : isSmallScreen ? 4 : -8,
                   scale: contactOpen ? 1 : isSmallScreen ? 1 : 0.985,
                 }}
                 transition={{
                   duration: reduceMotion ? 0.01 : isSmallScreen ? 0.5 : 0.42,
                   ease: easePremium,
                 }}
-                style={{ transformOrigin: 'top center' }}
-                className={`absolute inset-x-0 top-[calc(100%+0.35rem)] mx-auto w-full max-w-lg overflow-visible sm:overflow-hidden sm:top-[calc(100%+0.9rem)] ${
+                style={{ transformOrigin: isSmallScreen ? 'bottom center' : 'top center' }}
+                className={`absolute inset-x-0 mx-auto w-full max-w-lg overflow-visible max-sm:top-auto max-sm:bottom-[calc(100%+0.18rem)] sm:overflow-hidden sm:top-[calc(100%+0.9rem)] ${
                   contactOpen ? 'pointer-events-auto' : 'pointer-events-none'
                 }`}
               >
-                <div className="mx-auto max-w-lg max-sm:border-t max-sm:border-white/[0.06] max-sm:pt-3.5 sm:mx-4 sm:rounded-xl sm:border sm:border-white/[0.06] sm:bg-white/[0.025] sm:px-5 sm:py-4 sm:shadow-[0_6px_24px_rgba(0,0,0,0.08)] sm:backdrop-blur-lg">
+                <div className="mx-auto max-w-lg max-sm:pt-2 sm:mx-4 sm:rounded-xl sm:border sm:border-white/[0.06] sm:bg-white/[0.025] sm:px-5 sm:py-4 sm:shadow-[0_6px_24px_rgba(0,0,0,0.08)] sm:backdrop-blur-lg">
                   <a
                     href="mailto:hello@mutedstudio.ca"
                     className="coming-soon-contact-mail inline-block py-0.5 text-[clamp(1rem,3.2vw,1.06rem)] font-normal tracking-[0.02em] text-white/[0.95] underline decoration-white/[0.24] outline-none transition-[color,text-decoration-color] duration-300 [-webkit-tap-highlight-color:transparent] underline-offset-[0.3em] max-sm:decoration-white/[0.2] hover:text-accent hover:decoration-accent/40 focus:outline-none focus-visible:outline-none sm:py-1 sm:text-[1.08rem] sm:tracking-[0.01em] sm:text-white sm:decoration-white/35"
@@ -258,7 +294,7 @@ export default function ComingSoonHome() {
               </div>
             </footer>
           </div>
-        </div>
+        </motion.div>
         </div>
       </motion.div>
     </main>

@@ -279,6 +279,34 @@ a.coming-soon-contact-mail:focus-visible {
   animation: comingSoonTaglineIllume 5.2s ease-in-out infinite;
 }
 
+/* Intro text glow — static text-shadow so the GPU never has to repaint per-frame.
+   Paints once, then the parent fades it with opacity (compositor-friendly). */
+.intro-text-glow {
+  text-shadow:
+    0 0 12px rgba(155, 180, 212, 0.55),
+    0 0 28px rgba(155, 180, 212, 0.32),
+    0 0 54px rgba(155, 180, 212, 0.18),
+    0 1px 2px rgba(0, 0, 0, 0.55);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 767px) {
+  .intro-text-glow {
+    text-shadow:
+      0 0 10px rgba(155, 180, 212, 0.45),
+      0 0 22px rgba(155, 180, 212, 0.22),
+      0 1px 2px rgba(0, 0, 0, 0.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-text-glow {
+    text-shadow:
+      0 0 14px rgba(155, 180, 212, 0.4),
+      0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+}
+
 /* Grid System */
 .grid-container {
   display: grid;
