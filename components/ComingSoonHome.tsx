@@ -40,21 +40,36 @@ export default function ComingSoonHome() {
     }, INTRO_EXIT_HANDOFF_MS)
   }
 
-  const compactMotion = reduceMotion || isSmallScreen
+  /**
+   * `compactMotion` now means strictly "the user opted into reduced motion."
+   * Mobile users get the cinematic reveal too, just with shorter travel and
+   * tighter timing so it stays smooth on small / lower-powered devices.
+   */
+  const compactMotion = reduceMotion
 
   /**
-   * Reveal timeline (desktop). Each beat is deliberately spaced so no two
-   * elements compete for attention. Total runway ≈ 4.2s for an unhurried,
-   * composed entrance. Mobile / reduced-motion bypasses all of this with
-   * `initial={false}` and a near-instant duration.
+   * Reveal timeline. Each beat is deliberately spaced so no two elements
+   * compete for attention. Desktop runway ≈ 4.2s, mobile ≈ 3.2s. Reduced
+   * motion bypasses everything via `initial={false}` and ~0s durations.
+   *
+   * `x` distances are tuned per breakpoint — mobile uses smaller offsets so
+   * the motion reads cleanly on narrow viewports without feeling "twitchy."
    */
-  const reveal = {
-    accent: { delay: compactMotion ? 0 : 0.2, duration: compactMotion ? 0.01 : 1.4 },
-    title: { delay: compactMotion ? 0 : 0.45, duration: compactMotion ? 0.01 : 1.8 },
-    subtitle: { delay: compactMotion ? 0 : 1.2, duration: compactMotion ? 0.01 : 1.7 },
-    tagline: { delay: compactMotion ? 0 : 1.9, duration: compactMotion ? 0.01 : 1.55 },
-    contact: { delay: compactMotion ? 0 : 2.4, duration: compactMotion ? 0.3 : 1.8 },
-  }
+  const reveal = isSmallScreen
+    ? {
+        accent: { delay: 0.15, duration: 1.0 },
+        title: { delay: 0.35, duration: 1.3, x: -38 },
+        subtitle: { delay: 0.9, duration: 1.3, x: 38 },
+        tagline: { delay: 1.45, duration: 1.2, x: 26 },
+        contact: { delay: 1.85, duration: 1.4 },
+      }
+    : {
+        accent: { delay: 0.2, duration: 1.4 },
+        title: { delay: 0.45, duration: 1.8, x: -88 },
+        subtitle: { delay: 1.2, duration: 1.7, x: 80 },
+        tagline: { delay: 1.9, duration: 1.55, x: 56 },
+        contact: { delay: 2.4, duration: 1.8 },
+      }
 
   return (
     <main className="relative flex min-h-[100svh] flex-col bg-[#070707] text-foreground overflow-hidden sm:min-h-[100dvh]">
@@ -163,7 +178,7 @@ export default function ComingSoonHome() {
 
           <motion.h1
             aria-label="Muted Studio"
-            initial={compactMotion ? false : { opacity: 0, x: -88 }}
+            initial={compactMotion ? false : { opacity: 0, x: reveal.title.x }}
             animate={{ opacity: 1, x: 0 }}
             transition={{
               duration: reveal.title.duration,
@@ -186,7 +201,7 @@ export default function ComingSoonHome() {
           </motion.h1>
 
           <motion.div
-            initial={compactMotion ? false : { opacity: 0, x: 80 }}
+            initial={compactMotion ? false : { opacity: 0, x: reveal.subtitle.x }}
             animate={{ opacity: 1, x: 0 }}
             transition={{
               duration: reveal.subtitle.duration,
@@ -202,7 +217,7 @@ export default function ComingSoonHome() {
           </motion.div>
 
           <motion.p
-            initial={compactMotion ? false : { opacity: 0, x: 56 }}
+            initial={compactMotion ? false : { opacity: 0, x: reveal.tagline.x }}
             animate={{ opacity: 1, x: 0 }}
             transition={{
               duration: reveal.tagline.duration,
@@ -212,7 +227,7 @@ export default function ComingSoonHome() {
             className={`mt-4 max-w-3xl text-balance text-[clamp(0.9rem,3.2vw,1.14rem)] font-semibold uppercase leading-[1.62] tracking-[0.22em] text-white/[0.94] sm:mt-10 sm:text-[clamp(0.97rem,4.1vw,1.28rem)] sm:leading-[1.68] sm:tracking-[0.28em] ${
               reduceMotion
                 ? '[text-shadow:0_2px_12px_rgba(0,0,0,0.55)]'
-                : compactMotion
+                : isSmallScreen
                   ? 'coming-soon-tagline-illume-static'
                   : 'coming-soon-tagline-illume'
             }`}
