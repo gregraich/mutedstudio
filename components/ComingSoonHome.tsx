@@ -246,7 +246,7 @@ export default function ComingSoonHome() {
             ease: easePremium,
             delay: reveal.contact.delay,
           }}
-          className="pointer-events-auto relative z-20 mt-3 w-full shrink-0 pb-[max(1.75rem,env(safe-area-inset-bottom))] sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14"
+          className="pointer-events-auto relative z-20 w-full shrink-0 pb-[max(1.75rem,env(safe-area-inset-bottom))] max-sm:mt-2 sm:mt-12 sm:max-w-none sm:pb-[max(2.5rem,env(safe-area-inset-bottom))] lg:mt-14"
           style={{ willChange: compactMotion ? undefined : 'opacity' }}
         >
           <div className="mx-auto w-full max-w-xl text-center sm:min-h-[220px] lg:min-h-[236px]">
@@ -282,19 +282,19 @@ export default function ComingSoonHome() {
                 initial={false}
                 animate={{
                   opacity: contactOpen ? 1 : 0,
-                  y: contactOpen ? 0 : isSmallScreen ? 4 : -8,
+                  y: contactOpen ? 0 : isSmallScreen ? -6 : -8,
                   scale: contactOpen ? 1 : isSmallScreen ? 1 : 0.985,
                 }}
                 transition={{
-                  duration: reduceMotion ? 0.01 : isSmallScreen ? 0.5 : 0.42,
+                  duration: reduceMotion ? 0.01 : isSmallScreen ? 0.36 : 0.42,
                   ease: easePremium,
                 }}
-                style={{ transformOrigin: isSmallScreen ? 'bottom center' : 'top center' }}
-                className={`absolute inset-x-0 mx-auto w-full max-w-lg overflow-visible max-sm:top-auto max-sm:bottom-[calc(100%+0.18rem)] sm:overflow-hidden sm:top-[calc(100%+0.9rem)] ${
+                style={{ transformOrigin: 'top center' }}
+                className={`absolute inset-x-0 mx-auto w-full max-w-lg overflow-visible max-sm:top-[calc(100%+0.06rem)] max-sm:bottom-auto sm:overflow-hidden sm:top-[calc(100%+0.9rem)] ${
                   contactOpen ? 'pointer-events-auto' : 'pointer-events-none'
                 }`}
               >
-                <div className="mx-auto max-w-lg max-sm:pt-2 sm:mx-4 sm:rounded-xl sm:border sm:border-white/[0.06] sm:bg-white/[0.025] sm:px-5 sm:py-4 sm:shadow-[0_6px_24px_rgba(0,0,0,0.08)] sm:backdrop-blur-lg">
+                <div className="mx-auto max-w-lg max-sm:pt-0 sm:mx-4 sm:rounded-xl sm:border sm:border-white/[0.06] sm:bg-white/[0.025] sm:px-5 sm:py-4 sm:shadow-[0_6px_24px_rgba(0,0,0,0.08)] sm:backdrop-blur-lg">
                   <a
                     href="mailto:hello@mutedstudio.ca"
                     className="coming-soon-contact-mail inline-block py-0.5 text-[clamp(1rem,3.2vw,1.06rem)] font-normal tracking-[0.02em] text-white/[0.95] underline decoration-white/[0.24] outline-none transition-[color,text-decoration-color] duration-300 [-webkit-tap-highlight-color:transparent] underline-offset-[0.3em] max-sm:decoration-white/[0.2] hover:text-accent hover:decoration-accent/40 focus:outline-none focus-visible:outline-none sm:py-1 sm:text-[1.08rem] sm:tracking-[0.01em] sm:text-white sm:decoration-white/35"
